@@ -1,7 +1,7 @@
 import { login, logout, getInfo } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 
-const user = {
+const user1 = {
   state: {
     token: getToken(),
     name: '',
@@ -93,4 +93,4 @@ const user = {
   }
 }
 
-export default user
+export default user1

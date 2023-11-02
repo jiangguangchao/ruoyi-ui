@@ -11,7 +11,9 @@ export function login(username, password, code, uuid) {
   return request({
     url: '/login',
     headers: {
-      isToken: false
+      // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+      'abc': 'ccccc'
+,      isToken: false
     },
     method: 'post',
     data: data
