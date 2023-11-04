@@ -35,9 +35,19 @@ export function updateFlsqd(data) {
   })
 }
 
+//开启流程
 export function startFlsqd(data) {
   return request({
     url: '/fl/flsqd/start',
+    method: 'post',
+    data: data
+  })
+}
+
+//签名
+export function signFlsqd(data) {
+  return request({
+    url: '/fl/flsqd/sign',
     method: 'post',
     data: data
   })

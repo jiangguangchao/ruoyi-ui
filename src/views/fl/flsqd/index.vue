@@ -297,7 +297,7 @@
           <dict-tag :options="dict.type.fl_lc" :value="scope.row.dqlcjdmc"/>
         </template>
       </el-table-column>
-      <el-table-column label="当前所属操作人员" align="center" prop="dqczry" />
+      <el-table-column label="当前所属操作人员" align="center" prop="dqczrymc" />
       <el-table-column label="放疗单状态" align="center" prop="fldzt">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.fl_fldzt" :value="scope.row.fldzt"/>
@@ -323,10 +323,10 @@
           <el-button
             size="mini"
             type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['fl:flsqd:remove']"
-          >删除</el-button>
+            icon="el-icon-edit"
+            @click="openAlloctDig(scope.row)"
+            v-hasPermi="['fl:flsqd:edit']"
+          >指派</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -582,12 +582,29 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!--指派或转派弹窗-->
+    <el-dialog :visible.sync="allocateDigOpen" title="选择操作人员" width="500px">
+      <el-select v-model="selectedWorker" placeholder="请选择操作人员">
+        <el-option
+          v-for="item in postUserList"
+          :key="item.userId"
+          :label="item.userName"
+          :value="item.userId"
+        ></el-option>
+      </el-select>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="allocateDigOpen = false">取消</el-button>
+        <el-button type="primary" @click="allocateUser">确定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listFlsqd, getFlsqd, delFlsqd, addFlsqd, updateFlsqd, startFlsqd } from "@/api/fl/flsqd";
-import { listUser } from "@/api/system/user";
+import { listFlsqd, getFlsqd, delFlsqd, addFlsqd, updateFlsqd, startFlsqd, signFlsqd } from "@/api/fl/flsqd";
+import { allUser } from "@/api/system/user";
+import { allocate } from "./allocate.vue";
 
 export default {
   name: "Flsqd",
@@ -632,7 +649,14 @@ export default {
       },
       // 表单参数
       form: {},
+      //所有用户
       userList: [],
+      //(某个)岗位用户
+      postUserList: [],
+      allocateDigOpen: false,
+      selectedWorker: null,
+      selectedRow: null,
+
       // 表单校验
       rules: {
         hzXm: [
@@ -756,7 +780,7 @@ export default {
           console.log("当前申请单用户id", d.dqczry)
           this.userList.forEach(u=>{
             if (u.userId === d.dqczry) {
-              d.dqczry = u.userName
+              d.dqczrymc = u.userName
             }
           })
         })
@@ -820,8 +844,8 @@ export default {
       this.getList();
     },
     getUsers() {
-      listUser({}).then(response=> {
-        this.userList = response.rows
+      allUser({}).then(response=> {
+        this.userList = response.data
         console.log("查询到用户", this.userList)
       })
     },
@@ -893,7 +917,42 @@ export default {
       this.download('fl/flsqd/export', {
         ...this.queryParams
       }, `flsqd_${new Date().getTime()}.xlsx`)
-    }
+    },
+    openAlloctDig(row) {
+      this.postUserList = this.userList.filter(u=> u.postCode == row.dqlcjdmc);
+      console.log("岗位用户：", this.postUserList);
+      this.allocateDigOpen = true;
+      this.selectedWorker = row.dqczry;
+      this.selectedRow = row;
+    },
+    allocateUser() {
+      // 在这里执行指派任务的逻辑，可以通过this.selectedWorker获取选择的工作人员ID
+      console.log('已选择的工作人员ID：', this.selectedWorker);
+      this.allocateDigOpen = false;
+
+      var selectUser = this.selectedWorker
+      this.selectedWorker = null;
+      var flsqd = {
+        id: this.selectedRow.id,
+        dqczry: selectUser
+      }
+
+      updateFlsqd(flsqd).then(response => {
+        this.$modal.msgSuccess("指派成功");
+        this.open = false;
+        this.getList();
+      });
+
+    },
+    //签名
+    handleSign(row) {
+      this.$modal.confirm('确定签名？').then(function() {
+        return signFlsqd(row);
+      }).then(() => {
+        this.getList();
+        this.$modal.msgSuccess("签名成功");
+      }).catch(() => {});
+    },
   }
 };
 </script>
