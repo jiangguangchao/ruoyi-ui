@@ -327,6 +327,13 @@
             @click="openAlloctDig(scope.row)"
             v-hasPermi="['fl:flsqd:edit']"
           >指派</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
+            @click="openLCDig(scope.row)"
+            v-hasPermi="['fl:flsqd:edit']"
+          >流程详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -598,12 +605,58 @@
         <el-button type="primary" @click="allocateUser">确定</el-button>
       </span>
     </el-dialog>
+
+    <!--流程详情-->
+    <el-dialog :visible.sync="lcDetailOpen" title="选择操作人员" width="900px">
+      <div class="flowchart">
+        <div v-for="(step, index) in steps" :key="index" class="step">
+          <div class="stepDoing">
+            <p> {{ step.lcname }} -- {{ step.operator }} - {{ step.date }} </p>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
+
+<style scoped>
+  .flowchart {
+    display: flex;
+    align-items: center;
+  }
+
+
+
+
+
+  .step {
+    width: 200px;
+    margin-right: 20px;
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 4px;
+  }
+
+  .stepDone {
+    background-color: #45e520;
+  }
+
+  .stepDoing {
+    color: ##e14012;
+  }
+
+
+</style>
+
 <script>
 import { listFlsqd, getFlsqd, delFlsqd, addFlsqd, updateFlsqd, startFlsqd, signFlsqd } from "@/api/fl/flsqd";
+import { getFllcjl } from "@/api/fl/fllcjl";
 import { allUser } from "@/api/system/user";
+// import mermaid from 'mermaid';
+// import 'mermaid/dist/mermaid.css'; // 引入Mermaid样式文件
+// import mermaidConfig from '@/mermaid.config'; // 引入Mermaid配置文件
 
 export default {
   name: "Flsqd",
@@ -655,6 +708,16 @@ export default {
       allocateDigOpen: false,
       selectedWorker: null,
       selectedRow: null,
+      lcDetailOpen: false,
+      steps: [
+        { operator: '', date: '' , lc: 'dw' , lcname: '定位' },
+        { operator: '', date: '' , lc: 'bqgh' , lcname: '靶区勾画'},
+        { operator: '', date: '' , lc: 'bqhz' , lcname: '靶区核准'},
+        { operator: '', date: '' , lc: 'bqtj' , lcname: '靶区提交'},
+        { operator: '', date: '' , lc: 'jhsj' , lcname: '计划设计'},
+        { operator: '', date: '' , lc: 'jhhz' , lcname: '计划核准'},
+        { operator: '', date: '' , lc: 'fwyz' , lcname: '复位验证'},
+      ],
 
       // 表单校验
       rules: {
@@ -951,6 +1014,28 @@ export default {
         this.getList();
         this.$modal.msgSuccess("签名成功");
       }).catch(() => {});
+    },
+    //openLCDig
+    openLCDig(row) {
+      this.lcDetailOpen = true;
+      this.getFllcDetail(row);
+    },
+
+    getFllcDetail(row) {
+      getFllcjl(row.id).then(response=> {
+        var stepList = response.data;
+        if (stepList == undefined || stepList == null) {
+          console.log("当前放疗单流程详情为空")
+          return;
+        } else {
+          console.log("当前放疗单流程详情", stepList)
+          for(var i = 0; i < stepList.length; i++) {
+            this.steps[i].operator = stepList[i].czr;
+            this.steps[i].date = stepList[i].czsj;
+          }
+        }
+
+      });
     },
   }
 };
