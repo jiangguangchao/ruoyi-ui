@@ -604,7 +604,6 @@
 <script>
 import { listFlsqd, getFlsqd, delFlsqd, addFlsqd, updateFlsqd, startFlsqd, signFlsqd } from "@/api/fl/flsqd";
 import { allUser } from "@/api/system/user";
-import { allocate } from "./allocate.vue";
 
 export default {
   name: "Flsqd",
