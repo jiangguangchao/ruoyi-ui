@@ -332,8 +332,15 @@
             type="text"
             icon="el-icon-edit"
             @click="openLCDig(scope.row)"
-            v-hasPermi="['fl:flsqd:edit']"
+            v-hasPermi="['fl:fllcjl:list']"
           >流程详情</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
+            @click="handleSign(scope.row)"
+            v-hasPermi="['fl:flsqd:sign']"
+          >签名</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -652,7 +659,7 @@
 
 <script>
 import { listFlsqd, getFlsqd, delFlsqd, addFlsqd, updateFlsqd, startFlsqd, signFlsqd } from "@/api/fl/flsqd";
-import { getFllcjl } from "@/api/fl/fllcjl";
+import { listFllcjl, getFllcjl } from "@/api/fl/fllcjl";
 import { allUser } from "@/api/system/user";
 // import mermaid from 'mermaid';
 // import 'mermaid/dist/mermaid.css'; // 引入Mermaid样式文件
@@ -1022,21 +1029,41 @@ export default {
     },
 
     getFllcDetail(row) {
-      getFllcjl(row.id).then(response=> {
-        var stepList = response.data;
+      var query = {
+        flid: row.id
+      };
+      listFllcjl(query).then(response=> {
+        var stepList = response.rows;
         if (stepList == undefined || stepList == null) {
           console.log("当前放疗单流程详情为空")
           return;
         } else {
-          console.log("当前放疗单流程详情", stepList)
+          // console.log("当前放疗单流程详情", stepList)
           for(var i = 0; i < stepList.length; i++) {
-            this.steps[i].operator = stepList[i].czr;
+
+            this.steps[i].operator = this.getUserNameById(stepList[i].czr);
             this.steps[i].date = stepList[i].czsj;
+
+            // console.log("当前放疗单流程详情 item ", stepList[i].czr)
+            // console.log("当前放疗单流程详情 i ", stepList[i].czr)
+            // console.log("当前放疗单流程详情 this.steps[i].operator ", this.steps[i].operator)
           }
+
+          // console.log("当前放疗单流程详情 steps ", this.steps)
         }
 
       });
     },
+
+    getUserNameById(userId) {
+      var userName = '';
+      this.userList.forEach(u=> {
+        if (u.userId == userId) {
+          userName = u.userName;
+        }
+      })
+      return userName;
+    }
   }
 };
 </script>
