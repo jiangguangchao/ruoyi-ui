@@ -66,13 +66,26 @@ export function resetUserPwd(userId, password) {
 }
 
 // 用户状态修改
-export function changeUserStatus(userId, status) {
+export function changeUserStatus(userId, status) {//changeUserAssignWork
   const data = {
     userId,
     status
   }
   return request({
     url: '/system/user/changeStatus',
+    method: 'put',
+    data: data
+  })
+}
+
+// 用户分配任务状态修改
+export function changeUserAssignWork(userId, assignWork) {
+  const data = {
+    userId,
+    assignWork
+  }
+  return request({
+    url: '/system/user/assignWork',
     method: 'put',
     data: data
   })

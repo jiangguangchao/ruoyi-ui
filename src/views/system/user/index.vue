@@ -155,6 +155,16 @@
               ></el-switch>
             </template>
           </el-table-column>
+          <el-table-column label="任务分配状态" align="center" key="assignWork" >
+            <template slot-scope="scope">
+              <el-switch
+                v-model="scope.row.assignWork"
+                active-value="1"
+                inactive-value="0"
+                @change="handleAssignWorkChange(scope.row)"
+              ></el-switch>
+            </template>
+          </el-table-column>
           <el-table-column label="创建时间" align="center" prop="createTime" v-if="columns[6].visible" width="160">
             <template slot-scope="scope">
               <span>{{ parseTime(scope.row.createTime) }}</span>
@@ -259,12 +269,13 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="状态">
-              <el-radio-group v-model="form.status">
+            <el-form-item label="状态" >
+              <el-radio-group v-model="form.status" disabled>
                 <el-radio
                   v-for="dict in dict.type.sys_normal_disable"
                   :key="dict.value"
                   :label="dict.value"
+                  disabled
                 >{{dict.label}}</el-radio>
               </el-radio-group>
             </el-form-item>
@@ -345,7 +356,7 @@
 </template>
 
 <script>
-import { listUser, getUser, delUser, addUser, updateUser, resetUserPwd, changeUserStatus } from "@/api/system/user";
+import { listUser, getUser, delUser, addUser, updateUser, resetUserPwd, changeUserStatus, changeUserAssignWork } from "@/api/system/user";
 import { getToken } from "@/utils/auth";
 import { treeselect } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
@@ -498,10 +509,21 @@ export default {
       this.handleQuery();
     },
     // 用户状态修改
-    handleStatusChange(row) {
+    handleStatusChange(row) {//handleAssignWorkChange
       let text = row.status === "0" ? "启用" : "停用";
       this.$modal.confirm('确认要"' + text + '""' + row.userName + '"用户吗？').then(function() {
         return changeUserStatus(row.userId, row.status);
+      }).then(() => {
+        this.$modal.msgSuccess(text + "成功");
+      }).catch(function() {
+        row.status = row.status === "0" ? "1" : "0";
+      });
+    },
+    // 用户分配任务状态修改
+    handleAssignWorkChange(row) {
+      let text = row.assignWork === "0" ? "停用" : "启用";
+      this.$modal.confirm('确认要"' + text + '""' + row.userName + '"用户的任务分配状态吗？').then(function() {
+        return changeUserAssignWork(row.userId, row.assignWork);
       }).then(() => {
         this.$modal.msgSuccess(text + "成功");
       }).catch(function() {

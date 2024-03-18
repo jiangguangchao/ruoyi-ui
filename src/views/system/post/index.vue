@@ -113,6 +113,12 @@
             @click="handleDelete(scope.row)"
             v-hasPermi="['system:post:remove']"
           >删除</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
+            @click="showAssignWorkDialog(scope.row)"
+          >人员任务顺序</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -155,11 +161,21 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 岗位任务分配序列 -->
+    <el-dialog :title="assignWorkTitle" :visible.sync="assignWorkOpen" width="500px" append-to-body>
+      <AssignWork :assignWorkUserList="assignWorkUserList"></AssignWork>
+    </el-dialog>
+
+
+
   </div>
 </template>
 
 <script>
 import { listPost, getPost, delPost, addPost, updatePost } from "@/api/system/post";
+import { listUser } from "@/api/fl/assignwork";
+import  AssignWork  from "./assignWork.vue";
 
 export default {
   name: "Post",
@@ -184,6 +200,10 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      assignWorkTitle: "",
+      assignWorkOpen: false,
+      assignWorkUserList: [],
+
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -207,6 +227,9 @@ export default {
         ]
       }
     };
+  },
+  components: {
+    AssignWork
   },
   created() {
     this.getList();
@@ -305,7 +328,15 @@ export default {
       this.download('system/post/export', {
         ...this.queryParams
       }, `post_${new Date().getTime()}.xlsx`)
-    }
+    },
+
+    showAssignWorkDialog(row) {
+      this.assignWorkOpen = true;
+      listUser({"postCode": row.postCode}).then(response => {
+        this.assignWorkUserList = response;
+      });
+    },
+
   }
 };
 </script>

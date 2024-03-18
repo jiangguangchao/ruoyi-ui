@@ -307,6 +307,8 @@
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
+
+            v-show="scope.row.fldzt == 'wks'"
             size="mini"
             type="text"
             icon="el-icon-edit"
@@ -314,6 +316,7 @@
             v-hasPermi="['fl:flsqd:edit']"
           >开启</el-button>
           <el-button
+            v-show="scope.row.fldzt == 'jxz'"
             size="mini"
             type="text"
             icon="el-icon-edit"
@@ -321,6 +324,7 @@
             v-hasPermi="['fl:flsqd:edit']"
           >修改</el-button>
           <el-button
+            v-show="scope.row.fldzt == 'jxz'"
             size="mini"
             type="text"
             icon="el-icon-edit"
@@ -335,6 +339,7 @@
             v-hasPermi="['fl:fllcjl:list']"
           >流程详情</el-button>
           <el-button
+            v-show="scope.row.fldzt == 'jxz'"
             size="mini"
             type="text"
             icon="el-icon-edit"
@@ -827,9 +832,9 @@ export default {
         fldzt: [
           { required: true, message: "放疗单状态不能为空", trigger: "blur" }
         ],
-        fuid: [
-          { required: true, message: "初始放疗单不能为空", trigger: "blur" }
-        ]
+        // fuid: [
+        //   { required: true, message: "初始放疗单不能为空", trigger: "blur" }
+        // ]
       }
     };
   },
@@ -902,7 +907,7 @@ export default {
         jlyz: "0",
         dqlcjdmc: null,
         dqczry: null,
-        fldzt: "0",
+        fldzt: "jxz",
         fuid: null
       };
       this.resetForm("form");
