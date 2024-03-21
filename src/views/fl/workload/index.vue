@@ -3,13 +3,13 @@
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
 
 
-      <el-form-item label="放疗师" prop="dqlcjdmc">
-        <el-select v-model="queryParams.dqlcjdmc" placeholder="请选择放疗师" clearable size="small">
+      <el-form-item label="放疗师" prop="czr">
+        <el-select v-model="queryParams.czr" placeholder="请选择放疗师" clearable size="small">
           <el-option
-            v-for="dict in dict.type.fl_lc"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
+            v-for="fls in flsList"
+            :key="fls.userId"
+            :label="fls.userName"
+            :value="fls.userId"
           />
         </el-select>
       </el-form-item>
@@ -96,7 +96,7 @@
 <script>
 import { listFlsqd, getFlsqd, delFlsqd, addFlsqd, updateFlsqd, startFlsqd, signFlsqd } from "@/api/fl/flsqd";
 import { listFllcjl, getFllcjl } from "@/api/fl/fllcjl";
-import { listWorkload } from "@/api/fl/workload";
+import { listWorkload, fls } from "@/api/fl/workload";
 import { allUser } from "@/api/system/user";
 // import mermaid from 'mermaid';
 // import 'mermaid/dist/mermaid.css'; // 引入Mermaid样式文件
@@ -123,11 +123,13 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
+        czr: null
       },
       // 表单参数
       form: {},
       dateRange: '',
       workloadList: [],
+      flsList: [],
       lcDetailOpen: false,
       steps: [
         { operator: '', date: '' , lc: 'dw' , lcname: '定位' },
@@ -169,6 +171,7 @@ export default {
   },
   created() {
     this.getList();
+    this.getFls();
   },
   methods: {
     /** 查询工作量列表 */
@@ -179,6 +182,11 @@ export default {
         this.workloadList = response.rows;
         this.total = response.total;
         this.loading = false;
+      });
+    },
+    getFls() {
+      fls().then(response => {
+        this.flsList = response;
       });
     },
 

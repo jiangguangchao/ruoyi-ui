@@ -15,3 +15,10 @@ export function statWorkload(query) {
         params: query
     })
 }
+
+export function fls() {
+    return request({
+        url: '/fl/workload/fls',
+        method: 'get'
+    })
+}
