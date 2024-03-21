@@ -18,6 +18,7 @@
         <el-date-picker
           v-model="dateRange"
           type="datetimerange"
+          value-format="yyyy-MM-dd HH:mm:ss"
           :picker-options="pickerOptions"
           range-separator="至"
           start-placeholder="开始时间"
@@ -127,7 +128,7 @@ export default {
       },
       // 表单参数
       form: {},
-      dateRange: '',
+      dateRange: [],
       workloadList: [],
       flsList: [],
       lcDetailOpen: false,
@@ -177,7 +178,7 @@ export default {
     /** 查询工作量列表 */
     getList() {
       this.loading = true;
-
+      
       listWorkload(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
         this.workloadList = response.rows;
         this.total = response.total;
