@@ -1,14 +1,11 @@
 <template>
   <!-- 岗位任务分配序列 -->
-  <el-dialog :title="assignWorkTitle" :visible.sync="ziOpen" width="500px" @close="closeDia">
+  <el-dialog :title="assignWorkTitle" :visible.sync="assignWorkOpen" width="500px" @close="closeDia">
     <el-table :data="assignWorkUserList">
       <el-table-column label="序号" type="index" align="center" />
       <el-table-column label="人员名称" align="center" prop="userName" />
     </el-table>
   </el-dialog>
-
-
-  <!-- <p>1112</p> -->
 </template>
 
 <script>
@@ -17,37 +14,33 @@ import { listUser } from "@/api/fl/assignwork";
 
 export default {
   props: {
-    ziOpen: {
+    assignWorkOpen: {
       type: Boolean,
       default: false
     },
-    ziPostCode: {
+    assignWorkPostCode: {
       type: String,
       required: true
     }
   },
   data() {
     return {
-      loading: true,
       assignWorkUserList:[],
-      assignWorkTitle:"aaaa",
+      assignWorkTitle:"岗位任务分配顺序",
     }
   },
   watch: {
-      ziOpen(newVal) {
+      assignWorkOpen(newVal) {
         if (newVal) {
-          
-          this.getUsers(this.ziPostCode);
+          this.getUsers(this.assignWorkPostCode);
         }
       }
     },
   mounted() {
-    console.log("从父组件获取到值00--", this.assignWorkPostCode, this.assignWorkOpen)
   },
   methods: {
     closeDia() {
-      this.$emit('update:ziOpen', false);
-      // this.ziOpen = false
+      this.$emit('update:assignWorkOpen', false);
     },
 
     getUsers(postCode) {

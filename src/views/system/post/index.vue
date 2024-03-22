@@ -162,11 +162,7 @@
       </div>
     </el-dialog>
 
-    <!-- 岗位任务分配序列 -->
-    <!-- <el-dialog :title="assignWorkTitle" :visible.sync="assignWorkOpen" width="500px" append-to-body>
-      <AssignWork :assignWorkUserList="assignWorkUserList"></AssignWork>
-    </el-dialog> -->
-    <AssignWork :ziOpen="fuOpen" :ziPostCode="fuPostCode" @update:ziOpen="handlePopupClose"></AssignWork>
+    <AssignWork :assignWorkOpen="assignWorkOpen" :assignWorkPostCode="assignWorkPostCode" @update:assignWorkOpen="handleAssignWorkDialogClose"></AssignWork>
 
 
 
@@ -201,11 +197,8 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
-      assignWorkTitle: "",
+      assignWorkPostCode: "",
       assignWorkOpen: false,
-      assignWorkUserList: [],
-      fuPostCode: "",
-      fuOpen: false,
 
 
       // 查询参数
@@ -335,14 +328,11 @@ export default {
     },
 
     showAssignWorkDialog(row) {
-      this.fuOpen = true;
-      this.fuPostCode = row.postCode;
-      // listUser({"postCode": row.postCode}).then(response => {
-      //   this.assignWorkUserList = response;
-      // });
+      this.assignWorkPostCode = row.postCode;
+      this.assignWorkOpen = true;
     },
-    handlePopupClose(newVal) {
-      this.fuOpen=newVal
+    handleAssignWorkDialogClose(newVal) {
+      this.assignWorkOpen=newVal
     }
 
   }
