@@ -193,7 +193,7 @@
           <span>{{ parseTime(scope.row.hzSr, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="患者电话" align="center" prop="hzDh" />
+      <!-- <el-table-column label="患者电话" align="center" prop="hzDh" />
       <el-table-column label="患者住院号" align="center" prop="hzZyh" />
       <el-table-column label="患者科室" align="center" prop="hzKs" />
       <el-table-column label="患者病房医生" align="center" prop="hzBfys" />
@@ -291,7 +291,7 @@
         <template slot-scope="scope">
           <dict-tag :options="dict.type.sys_yes_no" :value="scope.row.jlyz"/>
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column label="当前流程节点" align="center" prop="dqlcjdmc">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.fl_lc" :value="scope.row.dqlcjdmc"/>
@@ -303,7 +303,7 @@
           <dict-tag :options="dict.type.fl_fldzt" :value="scope.row.fldzt"/>
         </template>
       </el-table-column>
-      <el-table-column label="初始放疗单" align="center" prop="fuid" />
+      <!-- <el-table-column label="初始放疗单" align="center" prop="fuid" /> -->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -346,6 +346,12 @@
             @click="handleSign(scope.row)"
             v-hasPermi="['fl:flsqd:sign']"
           >签名</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
+            @click="openDetail(scope.row)"
+          >详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -618,6 +624,8 @@
       </span>
     </el-dialog>
 
+    <flsqdDetail :flsqdDetailOpen="flsqdDetailOpen" :flsqdId="flsqdId" :flsqdObj="flsqdObj" @update:flsqdDetailOpen="closeDetail"></flsqdDetail>
+
     <!--流程详情-->
     <el-dialog :visible.sync="lcDetailOpen" title="选择操作人员" width="900px">
       <div class="flowchart">
@@ -666,6 +674,7 @@
 import { listFlsqd, getFlsqd, delFlsqd, addFlsqd, updateFlsqd, startFlsqd, signFlsqd } from "@/api/fl/flsqd";
 import { listFllcjl, getFllcjl } from "@/api/fl/fllcjl";
 import { allUser } from "@/api/system/user";
+import  flsqdDetail  from "./flsqdDetail.vue";
 // import mermaid from 'mermaid';
 // import 'mermaid/dist/mermaid.css'; // 引入Mermaid样式文件
 // import mermaidConfig from '@/mermaid.config'; // 引入Mermaid配置文件
@@ -721,6 +730,12 @@ export default {
       selectedWorker: null,
       selectedRow: null,
       lcDetailOpen: false,
+
+      flsqdDetailOpen: false,
+      flsqdId: null,
+      flsqdObj: null,
+
+
       steps: [
         { operator: '', date: '' , lc: 'dw' , lcname: '定位' },
         { operator: '', date: '' , lc: 'bqgh' , lcname: '靶区勾画'},
@@ -841,6 +856,9 @@ export default {
   created() {
     this.getUsers();
     this.getList();
+  },
+  components: {
+    flsqdDetail
   },
   methods: {
     /** 查询放疗申请单列表 */
@@ -1058,6 +1076,16 @@ export default {
         }
 
       });
+    },
+
+    openDetail(row) {
+      this.flsqdDetailOpen = true
+      this.flsqdId=row.id
+    },
+    closeDetail() {
+      this.flsqdDetailOpen = false
+      this.flsqdId=null
+      this.flsqdObj = null
     },
 
     getUserNameById(userId) {
