@@ -367,6 +367,9 @@
     <!-- 添加或修改放疗申请单对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="编号:">
+          <span>{{form.id}}</span>
+        </el-form-item>
         <el-form-item label="患者姓名" prop="hzXm">
           <el-input v-model="form.hzXm" placeholder="请输入患者姓名" />
         </el-form-item>
@@ -675,6 +678,7 @@ import { listFlsqd, getFlsqd, delFlsqd, addFlsqd, updateFlsqd, startFlsqd, signF
 import { listFllcjl, getFllcjl } from "@/api/fl/fllcjl";
 import { allUser } from "@/api/system/user";
 import  flsqdDetail  from "./flsqdDetail.vue";
+import { newId } from "../../../api/fl/flsqd";
 // import mermaid from 'mermaid';
 // import 'mermaid/dist/mermaid.css'; // 引入Mermaid样式文件
 // import mermaidConfig from '@/mermaid.config'; // 引入Mermaid配置文件
@@ -734,6 +738,7 @@ export default {
       flsqdDetailOpen: false,
       flsqdId: null,
       flsqdObj: null,
+      newId:null,
 
 
       steps: [
@@ -856,6 +861,7 @@ export default {
   created() {
     this.getUsers();
     this.getList();
+    this.getNewId();
   },
   components: {
     flsqdDetail
@@ -889,6 +895,7 @@ export default {
     reset() {
       this.form = {
         id: null,
+        myId: null,
         hzXm: null,
         hzXb: null,
         hzSr: null,
@@ -957,6 +964,12 @@ export default {
       this.reset();
       this.open = true;
       this.title = "添加放疗申请单";
+      console.log("获取到新id", this.newId)
+      this.form.id = this.newId;
+      // if (this.form.id == null || this.form.id == undefined || this.form.id = '') {
+      //   console.log("获取放疗单id失败")
+      //   this.$modal.msgSuccess("获取放疗单id失败");
+      // }
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -989,6 +1002,7 @@ export default {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
+              this.getNewId();
             });
           }
         }
@@ -1086,6 +1100,12 @@ export default {
       this.flsqdDetailOpen = false
       this.flsqdId=null
       this.flsqdObj = null
+    },
+
+    getNewId() {
+      newId().then(response => {
+        this.newId = response.data;
+      });
     },
 
     getUserNameById(userId) {

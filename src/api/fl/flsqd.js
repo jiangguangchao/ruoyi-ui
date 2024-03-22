@@ -17,6 +17,13 @@ export function getFlsqd(id) {
   })
 }
 
+export function newId() {
+  return request({
+    url: '/fl/flsqd/newId',
+    method: 'get'
+  })
+}
+
 // 新增放疗申请单
 export function addFlsqd(data) {
   return request({
