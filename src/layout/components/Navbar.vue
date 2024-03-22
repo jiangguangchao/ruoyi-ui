@@ -19,9 +19,11 @@
 
         <screenfull id="screenfull" class="right-menu-item hover-effect" /> -->
 
-        <el-tooltip content="岗位信息" effect="dark" placement="bottom">
+        <!-- <el-tooltip content="岗位信息" effect="dark" placement="bottom">
           <size-select id="size-select" class="right-menu-item hover-effect" />
-        </el-tooltip>
+        </el-tooltip> -->
+
+        <el-tag type="success" size="medium" effect="dark">靶区勾画</el-tag>
 
       </template>
 
