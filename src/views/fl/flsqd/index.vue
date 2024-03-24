@@ -631,14 +631,18 @@
 
     <!--流程详情-->
     <el-dialog :visible.sync="lcDetailOpen" title="选择操作人员" width="900px">
-      <div class="flowchart">
+      <!-- <div class="flowchart">
         <div v-for="(step, index) in steps" :key="index" class="step">
           <div class="stepDoing">
             <p> {{ step.lcname }} -- {{ step.operator }} - {{ step.date }} </p>
           </div>
         </div>
-      </div>
+      </div> -->
+      <lcDetail></lcDetail>
     </el-dialog>
+
+    
+    
 
   </div>
 </template>
@@ -679,6 +683,7 @@ import { listFllcjl, getFllcjl } from "@/api/fl/fllcjl";
 import { allUser } from "@/api/system/user";
 import  flsqdDetail  from "./flsqdDetail.vue";
 import { newId } from "../../../api/fl/flsqd";
+import lcDetail from "./lcDetail.vue";
 // import mermaid from 'mermaid';
 // import 'mermaid/dist/mermaid.css'; // 引入Mermaid样式文件
 // import mermaidConfig from '@/mermaid.config'; // 引入Mermaid配置文件
@@ -739,6 +744,7 @@ export default {
       flsqdId: null,
       flsqdObj: null,
       newId:null,
+      processNodes:['节点1', '节点2', '节点3', '节点4'],
 
 
       steps: [
@@ -864,7 +870,8 @@ export default {
     this.getNewId();
   },
   components: {
-    flsqdDetail
+    flsqdDetail,
+    lcDetail
   },
   methods: {
     /** 查询放疗申请单列表 */

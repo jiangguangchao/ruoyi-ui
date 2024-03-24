@@ -284,7 +284,7 @@
         <el-row>
           <el-col :span="12">
             <el-form-item label="岗位">
-              <el-select v-model="form.postIds" placeholder="请选择">
+              <el-select v-model="form.postId" placeholder="请选择" @change="postChange">
                 <el-option
                   v-for="item in postOptions"
                   :key="item.postId"
@@ -549,7 +549,8 @@ export default {
         status: "0",
         remark: undefined,
         postIds: [],
-        roleIds: []
+        roleIds: [],
+        postId: undefined
       };
       this.resetForm("form");
     },
@@ -605,11 +606,17 @@ export default {
         this.postOptions = response.posts;
         this.roleOptions = response.roles;
         this.form.postIds = response.postIds;
+        this.form.postId = response.postIds.length == 0 ? undefined : response.postIds[0];
         this.form.roleIds = response.roleIds;
         this.open = true;
         this.title = "修改用户";
         this.form.password = "";
       });
+    },
+
+    postChange(postId) {
+      console.log("postId改为了", postId)
+      console.log("this.form.postId", this.form.postId)
     },
     /** 重置密码按钮操作 */
     handleResetPwd(row) {
@@ -634,6 +641,7 @@ export default {
     submitForm: function() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          this.form.postIds[0] = this.form.postId;
           if (this.form.userId != undefined) {
             updateUser(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
