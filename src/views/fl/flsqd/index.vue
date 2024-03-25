@@ -641,8 +641,8 @@
       <lcDetail></lcDetail>
     </el-dialog>
 
-    
-    
+
+
 
   </div>
 </template>
@@ -739,6 +739,7 @@ export default {
       selectedWorker: null,
       selectedRow: null,
       lcDetailOpen: false,
+      addFlag:true,
 
       flsqdDetailOpen: false,
       flsqdId: null,
@@ -973,6 +974,7 @@ export default {
       this.title = "添加放疗申请单";
       console.log("获取到新id", this.newId)
       this.form.id = this.newId;
+      this.addFlag = true;
       // if (this.form.id == null || this.form.id == undefined || this.form.id = '') {
       //   console.log("获取放疗单id失败")
       //   this.$modal.msgSuccess("获取放疗单id失败");
@@ -986,6 +988,7 @@ export default {
         this.form = response.data;
         this.open = true;
         this.title = "修改放疗申请单";
+        this.addFlag = false;
       });
     },
     handleStart(row) {
@@ -998,7 +1001,7 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.form.id != null) {
+          if (!this.addFlag) {
             updateFlsqd(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
