@@ -284,7 +284,7 @@
         <el-row>
           <el-col :span="12">
             <el-form-item label="岗位">
-              <el-select v-model="form.postId" placeholder="请选择" @change="postChange">
+              <el-select v-model="form.postId" placeholder="请选择">
                 <el-option
                   v-for="item in postOptions"
                   :key="item.postId"
@@ -602,11 +602,12 @@ export default {
       this.getTreeselect();
       const userId = row.userId || this.ids;
       getUser(userId).then(response => {
+        response.data.postId = response.postIds.length == 0 ? undefined : response.postIds[0];
         this.form = response.data;
         this.postOptions = response.posts;
         this.roleOptions = response.roles;
         this.form.postIds = response.postIds;
-        this.form.postId = response.postIds.length == 0 ? undefined : response.postIds[0];
+        // this.form.postId = response.postIds.length == 0 ? undefined : response.postIds[0];
         this.form.roleIds = response.roleIds;
         this.open = true;
         this.title = "修改用户";
@@ -614,10 +615,6 @@ export default {
       });
     },
 
-    postChange(postId) {
-      console.log("postId改为了", postId)
-      console.log("this.form.postId", this.form.postId)
-    },
     /** 重置密码按钮操作 */
     handleResetPwd(row) {
       this.$prompt('请输入"' + row.userName + '"的新密码', "提示", {
