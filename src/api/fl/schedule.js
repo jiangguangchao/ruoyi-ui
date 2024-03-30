@@ -17,6 +17,15 @@ export function getSchedule(id) {
   })
 }
 
+// 保存排班
+export function save(data) {
+  return request({
+    url: '/fl/schedule/save',
+    method: 'post',
+    data: data
+  })
+}
+
 // 新增排班
 export function addSchedule(data) {
   return request({
