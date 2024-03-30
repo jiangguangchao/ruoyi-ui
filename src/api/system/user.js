@@ -22,7 +22,18 @@ export function allUser(query) {
 export function getUser(userId) {
   return request({
     url: '/system/user/' + parseStrEmpty(userId),
-    method: 'get'
+    method: 'get',
+
+  })
+}
+
+export function getUserByPostCode(postCode) {
+  return request({
+    url: '/system/user/getUserByPostCode',
+    method: 'get',
+    params: {
+      postCode
+    }
   })
 }
 

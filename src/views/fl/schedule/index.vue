@@ -17,7 +17,7 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleUpdate"
+        <el-button type="success" plain icon="el-icon-edit" size="mini" @click="handleUpdate"
           v-hasPermi="['fl:schedule:edit']">修改</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
@@ -32,7 +32,7 @@
       <el-table-column label="名称" width="130">
         <template slot-scope="scope">
           <el-select v-model="scope.row.userId" placeholder="技师选择">
-            <el-option v-for="item in userArr" :key="item.id" :label="item.name" :value="item.id">
+            <el-option v-for="item in userArr" :key="item.userId" :label="item.userName" :value="item.userId">
             </el-option>
           </el-select>
         </template>
@@ -63,8 +63,8 @@
           </div>
           <div class="select-container" v-show="!(scope.row.tb == '1' && index>0 && index<5) && scope.row.db == '1'">
             <el-select class="select-left" v-model="scope.row.arr[index].db.userId" placeholder="代班技师选择">
-              <el-option v-for="item in userArr" :key="item.id" :label="item.name" :value="item.id"
-                :disabled="scope.row.userId == item.id"></el-option>
+              <el-option v-for="item in userArr" :key="item.userId" :label="item.userName" :value="item.userId"
+                :disabled="scope.row.userId == item.userId"></el-option>
             </el-select>
             <el-select class="select-right" v-model="scope.row.arr[index].db.time" v-if="scope.row.arr[index].time == 3"
               placeholder="代班时间选择">
@@ -108,6 +108,12 @@
     updateSchedule
   } from "@/api/fl/schedule";
 
+  import {
+    getUserByPostCode,
+  } from "@/api/system/user";
+
+  import { listMachine } from "@/api/fl/machine";
+
   export default {
     name: "Schedule",
     dicts: ['zhibansj'],
@@ -115,45 +121,48 @@
       return {
 
         tableData: [],
-        userArr: [{
-            id: 1,
-            name: '用户1'
-          },
-          {
-            id: 2,
-            name: '用户2'
-          },
-          {
-            id: 3,
-            name: '用户3'
-          },
-          {
-            id: 4,
-            name: '用户4'
-          },
-          {
-            id: 5,
-            name: '用户5'
-          },
-        ],
+        // userArr: [
+        //   {
+        //     userId: 1,
+        //     userName: '用户1'
+        //   },
+        //   {
+        //     userId: 2,
+        //     userName: '用户2'
+        //   },
+        //   {
+        //     userId: 3,
+        //     userName: '用户3'
+        //   },
+        //   {
+        //     userId: 4,
+        //     userName: '用户4'
+        //   },
+        //   {
+        //     userId: 5,
+        //     userName: '用户5'
+        //   },
+        // ],
+        userArr: [],
 
-        machineArr: [{
-            id: 1,
-            name: '机器1'
-          },
-          {
-            id: 2,
-            name: '机器2'
-          },
-          {
-            id: 3,
-            name: '机器3'
-          },
-          {
-            id: 4,
-            name: '机器4'
-          },
-        ],
+        // machineArr: [{
+        //     id: 1,
+        //     name: '机器1'
+        //   },
+        //   {
+        //     id: 2,
+        //     name: '机器2'
+        //   },
+        //   {
+        //     id: 3,
+        //     name: '机器3'
+        //   },
+        //   {
+        //     id: 4,
+        //     name: '机器4'
+        //   },
+        // ],
+        machineArr: [],
         week: [{
             id: 1,
             name: 'z1'
@@ -222,29 +231,41 @@
       };
     },
     beforeMount() {
-      var dataArr = [];
-      for (let i = 0; i < this.userArr.length; i++) {
-        let arr = [];
-        for (let j = 0; j < this.week.length; j++) {
-          arr.push({
-            mid: null,
-            time: null,
-            db: {
-              userId: null,
+
+      // listMachine(this.queryParams).then(response => {
+      //   this.machineList = response.rows;
+      //   this.total = response.total;
+      //   this.loading = false;
+      // });
+
+      Promise.all([getUserByPostCode('dw'), listMachine({pageNum: 1, pageSize: 100,})]).then(([response1, response2])=> {
+        this.userArr = response1.data
+        this.machineArr = response2.rows
+        var dataArr = [];
+        for (let i = 0; i < this.userArr.length; i++) {
+          let arr = [];
+          for (let j = 0; j < this.week.length; j++) {
+            arr.push({
+              mid: null,
               time: null,
-            },
+              db: {
+                userId: null,
+                time: null,
+              },
 
 
-          });
+            });
+          }
+          let obj = {
+            tb: '1',
+            db: '0',
+            arr: arr
+          }
+          dataArr.push(obj)
         }
-        let obj = {
-          tb: '1',
-          db: '0',
-          arr: arr
-        }
-        dataArr.push(obj)
-      }
-      this.tableData = dataArr
+        this.tableData = dataArr
+      });
+
 
     },
     watch: {
@@ -289,6 +310,7 @@
 
     created() {
       this.getList();
+      //this.getUser();
     },
     methods: {
 
@@ -353,6 +375,13 @@
         this.daterangeSchDate = [];
         this.resetForm("queryForm");
         this.handleQuery();
+      },
+
+      getUser(){
+        getUserByPostCode('dw').then(response => {
+          console.log("查询到用户", response.data)
+          this.userArr = response.data
+        });
       },
 
       /** 修改按钮操作 */

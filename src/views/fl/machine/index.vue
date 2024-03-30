@@ -20,14 +20,15 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="工作状态" prop="workState">
-        <el-input
-          v-model="queryParams.workState"
-          placeholder="请输入工作状态"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="是否工作中" prop="workState">
+        <el-select v-model="queryParams.workState" placeholder="请选择是否工作中" clearable size="small">
+          <el-option
+            v-for="dict in dict.type.sys_yes_no"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -90,7 +91,11 @@
         </template>
       </el-table-column>
       <el-table-column label="机器名称" align="center" prop="name" />
-      <el-table-column label="工作状态" align="center" prop="workState" />
+      <el-table-column label="是否工作中" align="center" prop="workState">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.sys_yes_no" :value="scope.row.workState"/>
+        </template>
+      </el-table-column>
       <el-table-column label="创建者" align="center" prop="createBy" />
       <el-table-column label="创建时间" align="center" prop="createTime" width="180">
         <template slot-scope="scope">
@@ -148,8 +153,15 @@
         <el-form-item label="机器名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入机器名称" />
         </el-form-item>
-        <el-form-item label="工作状态" prop="workState">
-          <el-input v-model="form.workState" placeholder="请输入工作状态" />
+        <el-form-item label="是否工作中" prop="workState">
+          <el-select v-model="form.workState" placeholder="请选择是否工作中">
+            <el-option
+              v-for="dict in dict.type.sys_yes_no"
+              :key="dict.value"
+              :label="dict.label"
+:value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
@@ -168,7 +180,7 @@ import { listMachine, getMachine, delMachine, addMachine, updateMachine } from "
 
 export default {
   name: "Machine",
-  dicts: ['fl_zljq'],
+  dicts: ['fl_zljq', 'sys_yes_no'],
   data() {
     return {
       // 遮罩层
@@ -180,7 +192,7 @@ export default {
       // 非多个禁用
       multiple: true,
       // 显示搜索条件
-      showSearch: false,
+      showSearch: true,
       // 总条数
       total: 0,
       // 放疗机器表格数据
