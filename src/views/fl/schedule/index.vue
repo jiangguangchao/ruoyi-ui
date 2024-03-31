@@ -1,17 +1,15 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="用户id" prop="userId">
-        <el-input v-model="queryParams.userId" placeholder="请输入用户id" clearable size="small"
-          @keyup.enter.native="handleQuery" />
-      </el-form-item>
+      <!-- <el-form-item label="用户id" prop="userId">
+        <el-input v-model="queryParams.userId" placeholder="请输入用户id" clearable size="small" />
+      </el-form-item> -->
       <el-form-item label="值班日期">
-        <el-date-picker v-model="selectWeek" type="week" format="第WW周 MMdd" placeholder="选择周"
-          @change="createWeekArr" >
+        <el-date-picker v-model="selectWeek" type="week" format="第WW周 MMdd" placeholder="选择周" @change="createWeekArr">
         </el-date-picker>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="getList">搜索</el-button>
       </el-form-item>
     </el-form>
 
@@ -20,15 +18,23 @@
         <el-button type="success" plain icon="el-icon-edit" size="mini" @click="handleUpdate"
           v-hasPermi="['fl:schedule:edit']">修改</el-button>
       </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      <!-- <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar> -->
     </el-row>
 
+    <el-table :data="tableData" style="width: 100%" border v-if="!editFlag">
+      <el-table-column  label="技师" width="130">
+        <template slot-scope="scope">
+          <span>{{ getUserNameById(scope.row.userId) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="item.name" width="230" v-for="(item, index) in week">
+        <template slot-scope="scope">
+          <span>{{ getMTNameById(scope.row.arr[index].machineId , scope.row.arr[index].schTime)  }}</span>
+        </template>
+      </el-table-column>
+    </el-table>
 
-    <el-table :data="tableData" style="width: 100%" border>
-      <!--        <el-table-column prop="date" label="日期" width="180"></el-table-column>-->
-      <!--        <el-table-column prop="name" label="姓名" width="180"></el-table-column>-->
-      <!--        <el-table-column prop="address" label="地址"></el-table-column>-->
-
+    <el-table :data="tableData" style="width: 100%" border v-if="editFlag">
       <el-table-column label="名称" width="130">
         <template slot-scope="scope">
           <el-select v-model="scope.row.userId" placeholder="技师选择">
@@ -38,34 +44,19 @@
         </template>
       </el-table-column>
 
-      <!-- <el-table-column :label="item.name" width="180" v-for="(item, index) in week">
-            <template slot-scope="scope">
-                <el-select v-model="scope.row.arr[index].machineId">
-                    <el-option v-for="item in machineArr" :key="item.id" :label="item.name" :value="item.id">
-                    </el-option>
-                </el-select>
-                <el-select v-model="scope.row.arr[index].time">
-                    <el-option v-for="item in timeArr" :key="item.id" :label="item.name" :value="item.id">
-                    </el-option>
-                </el-select>
-            </template>
-        </el-table-column> -->
-
       <el-table-column :label="item.name" width="230" v-for="(item, index) in week">
         <template slot-scope="scope">
           <div class="select-container" v-show="!(scope.row.tb == '1' && index > 0 && index < 5)">
             <el-select class="select-left" v-model="scope.row.arr[index].machineId" placeholder="机器选择">
               <el-option v-for="item in machineArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
-            <!-- <el-select class="select-right" v-model="scope.row.arr[index].time" placeholder="时间选择">
-              <el-option v-for="item in timeArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
-            </el-select> -->
             <el-select class="select-right" v-model="scope.row.arr[index].schTime" placeholder="时间选择">
               <el-option v-for="item in dict.type.zhibansj" :key="item.value" :label="item.label"
                 :value="item.value"></el-option>
             </el-select>
           </div>
-          <div class="select-container" v-show="!(scope.row.tb == '1' && index > 0 && index < 5) && scope.row.db == '1'">
+          <div class="select-container"
+            v-show="!(scope.row.tb == '1' && index > 0 && index < 5) && scope.row.db == '1'">
             <el-select class="select-left" v-model="scope.row.arr[index].dbr" placeholder="代班技师选择">
               <el-option v-for="item in userArr" :key="item.userId" :label="item.userName" :value="item.userId"
                 :disabled="scope.row.userId == item.userId"></el-option>
@@ -82,7 +73,7 @@
           </div>
           <div class="select-container" v-show="scope.row.tb == '1' && index > 0 && index < 5">
             <!--                    <span>{{scope.row.arr[index].machineId}}</span>-->
-            <span>{{ getNameById(scope.row.arr[index].machineId, scope.row.arr[index].schTime) }}</span>
+            <span>{{ getMTNameById(scope.row.arr[index].machineId, scope.row.arr[index].schTime) }}</span>
           </div>
         </template>
       </el-table-column>
@@ -116,14 +107,15 @@ import {
   delSchedule,
   addSchedule,
   updateSchedule,
-  save
+  save,
+  tableList,
 } from "@/api/fl/schedule";
 
 import {
   getUserByPostCode,
 } from "@/api/system/user";
 
-import { listMachine} from "@/api/fl/machine";
+import { listMachine } from "@/api/fl/machine";
 
 export default {
   name: "Schedule",
@@ -131,10 +123,10 @@ export default {
   data() {
     return {
 
-      startData: '2023-03-25',
+      editFlag: false,
       tableData: [],
       userArr: [],
-      selectWeek:'',
+      selectWeek: null,
 
       machineArr: [],
       week: [{
@@ -184,7 +176,16 @@ export default {
       // 显示搜索条件
       showSearch: true,
       // 排班表格数据
-      scheduleList: [],
+      scheduleList: [
+        // {
+        //   id: 1,
+        //   name: 'n1'
+        // },
+        // {
+        //   id: 2,
+        //   name: 'n2'
+        // },
+      ],
       //时间范围
       daterangeSchDate: [],
       // 查询参数
@@ -204,7 +205,18 @@ export default {
       }
     };
   },
+  computed: {
+    mytest(id) {
+      return 'aaabbb' + id;
+    },
+    getUserNameById2(id) {
+      return this.getUserNameById(id);
+    },
+  },
   beforeMount() {
+    if (true) {
+      return;
+    }
 
     Promise.all([getUserByPostCode('jishi'), listMachine({ pageNum: 1, pageSize: 100, })]).then(([response1, response2]) => {
       this.userArr = response1.data
@@ -226,115 +238,87 @@ export default {
         dataArr.push(obj)
       }
       this.tableData = dataArr
+
+      var testList = [
+        {
+          id: 1,
+          name: 'n1'
+        },
+        {
+          id: 2,
+          name: 'n2'
+        },
+      ]
+      this.machineChange();
+      this.scheduleList = testList;
+
     });
 
 
   },
-  watch: {
-    tableData: {
-      handler(newVal, oldVal) {
 
-        console.log("handler----------")
-        newVal.forEach((e, index) => {
-
-          if (e.tb == '1') {
-            console.log("第", index, "行同步,同步前", e)
-            e.arr.forEach((t, index2) => {
-              if (index2 > 0 && index2 < 5) {
-                t.machineId = e.arr[0].machineId
-                t.schTime = e.arr[0].schTime
-              }
-
-            })
-          } else {
-            console.log("第", index, "行不同步 ", e)
-          }
-        })
-
-        // console.log(newVal[0].arr[0].machineId)
-        // console.log(oldVal[0].arr[0].machineId)
-
-        // for (let i = 0; i < this.tableData.length; i++) {
-        //     let oldMid = oldVal[i].arr[0].machineId;
-        //     let newMid = newVal[i].arr[0].machineId;
-        //     console.log("值 ", oldMid, newMid);
-        //     if (oldMid != newMid) {
-        //         console.log("第", i, "行机器发生变化")
-        //     } else {
-        //         console.log("第", i, "行机器没有发生变化")
-        //     }
-        // }
-      },
-      deep: true
-    }
+  mounted() {
   },
+
 
 
   created() {
-    this.getList();
-    //this.getUser();
+    // this.getList();
+    this.getUser();
+    this.getMachine();
   },
   methods: {
 
-
-    getNameById(machineId, timeid) {
-      return this.getMachineNameById(machineId) + " " + this.getTimeById(timeid)
+    myprop(){
+      return '测试';
     },
 
-    getMachineNameById(id) {
-      if (id == null || id == undefined) {
-        return '';
-      }
-      var m = this.machineArr.find(e => e.id == id)
-      if (m == null) {
-        return '';
-      }
-      return m.name;
-    },
 
-    getTimeById(id) {
-      if (id == null || id == undefined) {
-        return '';
-      }
-      var m = this.dict.type.zhibansj.find(e => e.value == id)
-      if (m == null) {
-        return '';
-      }
-      return m.label;
-    },
     /** 查询排班列表 */
     getList() {
-      this.queryParams.params = {};
-      if (null != this.daterangeSchDate && '' != this.daterangeSchDate) {
-        this.queryParams.params["beginSchDate"] = this.daterangeSchDate[0];
-        this.queryParams.params["endSchDate"] = this.daterangeSchDate[1];
+
+      // this.scheduleList[0].id = 57;
+      // this.scheduleList[1].id = 771;
+
+      if (this.selectWeek == null) {
+        this.$modal.msgError("请选择日期");
+        return;
       }
-      listSchedule(this.queryParams).then(response => {
-        this.scheduleList = response.rows;
-        this.total = response.total;
+
+      this.queryParams.params = {};
+      this.queryParams.params["beginTime"] = this.week[0].date;
+      this.queryParams.params["endTime"] = this.week[6].date;
+      tableList(this.queryParams).then(response => {
+        console.log("查询到排班", response.data)
+        this.tableData = response.data;
       });
     },
 
-
-    /** 搜索按钮操作 */
-    handleQuery() {
-      console.log("开始时间类型", typeof this.selectWeek)
-      console.log("开始时间", this.selectWeek)
-
-      this.createWeekArr();
-    },
-
     getUser() {
-      getUserByPostCode('dw').then(response => {
+      getUserByPostCode('jishi').then(response => {
         console.log("查询到用户", response.data)
         this.userArr = response.data
       });
     },
 
+    getMachine() {
+      listMachine({ pageNum: 1, pageSize: 100, }).then(response => {
+        this.machineArr = response.rows
+      });
+    },
+
     /** 修改按钮操作 */
-    handleUpdate(row) { },
+    handleUpdate(row) {
+      this.editFlag = true;
+    },
     /** 提交按钮 */
     submitForm() {
+
+      this.editFlag = false;
+      if(true) {
+        return;
+      }
+
       var dataList = [];
 
       for (let i = 0; i < this.tableData.length; i++) {
@@ -368,14 +352,78 @@ export default {
     },
 
     createWeekArr() {
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < this.week.length; i++) {
         let date = new Date(this.selectWeek.getTime() + 24 * 60 * 60 * 1000 * i);
+        //date转字符串
+        date = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
         this.week[i].date = date;
       }
       console.log("日期", this.week)
     },
 
-  }
+    //监控机器id变化
+    machineChange() {
+      this.tableData.forEach((item, index) => {
+        this.$watch(
+          function () {
+            return item.arr[0].machineId + item.arr[0].schTime + item.tb;
+          },
+          function (newVal, oldVal) {
+            console.log(`第 ${index + 1} 个技师的 机器 发生了变化：`, oldVal, '->', newVal);
+            if (item.tb == '1') {
+              item.arr.forEach((e, i) => {
+                if (i > 0 && i < 5) {
+                  e.machineId = item.arr[0].machineId;
+                  e.schTime = item.arr[0].schTime;
+                }
+              })
+            }
+          }
+        );
+      });
+    },
+
+    getMTNameById(machineId, timeid) {
+      return this.getMachineNameById(machineId) + " " + this.getTimeById(timeid)
+    },
+
+    getMachineNameById(id) {
+      if (id == null || id == undefined) {
+        return '';
+      }
+      var m = this.machineArr.find(e => e.id == id)
+      if (m == null) {
+        return '';
+      }
+      return m.name;
+    },
+
+    getTimeById(id) {
+      if (id == null || id == undefined) {
+        return '';
+      }
+      var m = this.dict.type.zhibansj.find(e => e.value == id)
+      if (m == null) {
+        return '';
+      }
+      return m.label;
+    },
+
+    getUserNameById(id) {
+      console.log("userArr", this.userArr);
+      if (id == null || id == undefined) {
+        return '';
+      }
+      var m = this.userArr.find(e => e.userId == id)
+      if (m == null) {
+        return '';
+      }
+      return m.userName;
+    },
+  },
+
+
+
 }
 </script>
 

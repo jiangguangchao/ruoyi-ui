@@ -9,6 +9,15 @@ export function listSchedule(query) {
   })
 }
 
+// 查询排班信息，默认返回前段显示数据结构
+export function tableList(query) {
+  return request({
+    url: '/fl/schedule/tableList',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询排班详细
 export function getSchedule(id) {
   return request({
