@@ -349,6 +349,7 @@ export default {
         //date转字符串
         date = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
         this.week[i].date = date;
+        this.week[i].name = this.week[i].name + " " + date;
       }
       console.log("日期", this.week)
     },
