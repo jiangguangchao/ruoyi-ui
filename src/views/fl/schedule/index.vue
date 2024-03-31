@@ -93,7 +93,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-button type="primary" @click="submitForm()">提交</el-button>
+    <el-button v-if="editFlag" type="primary" @click="submitForm()">提交</el-button>
 
 
 
@@ -206,12 +206,6 @@ export default {
     };
   },
   computed: {
-    mytest(id) {
-      return 'aaabbb' + id;
-    },
-    getUserNameById2(id) {
-      return this.getUserNameById(id);
-    },
   },
   beforeMount() {
     if (true) {
@@ -249,7 +243,7 @@ export default {
           name: 'n2'
         },
       ]
-      this.machineChange();
+      this.watchMachineChange();
       this.scheduleList = testList;
 
     });
@@ -269,9 +263,6 @@ export default {
   },
   methods: {
 
-    myprop(){
-      return '测试';
-    },
 
 
     /** 查询排班列表 */
@@ -291,6 +282,8 @@ export default {
       tableList(this.queryParams).then(response => {
         console.log("查询到排班", response.data)
         this.tableData = response.data;
+        this.buildEditTableData();
+        this.watchMachineChange();
       });
     },
 
@@ -308,16 +301,14 @@ export default {
     },
 
     /** 修改按钮操作 */
-    handleUpdate(row) {
+    handleUpdate() {
       this.editFlag = true;
+      this.buildEditTableData();
     },
     /** 提交按钮 */
     submitForm() {
 
       this.editFlag = false;
-      if(true) {
-        return;
-      }
 
       var dataList = [];
 
@@ -335,6 +326,7 @@ export default {
             t.dbsj = t.schTime;
           }
           dataList.push({
+            id: t.id,
             userId: e.userId,
             machineId: t.machineId,
             schTime: t.schTime,
@@ -361,8 +353,48 @@ export default {
       console.log("日期", this.week)
     },
 
+    //根据userArr填充tableData
+    buildEditTableData(){
+      this.userArr.forEach((item, index) => {
+        //如果userId在tableData中不存在，则在tableData中添加
+        if (this.tableData.findIndex(e => e.userId == item.userId) == -1) {
+          var arr = [];
+          for (let i = 0; i < this.week.length; i++) {
+            arr.push({
+              machineId: null,
+              schTime: null,
+            });
+          }
+
+          this.tableData.push({
+            userId: item.userId,
+            tb: '1',
+            db: '0',
+            arr: arr
+          })
+        }
+      });
+    },
+
+    //移除tableData中userId为null的元素和arr中machineId为全为null的元素
+    removeEmptyTableData() {
+      this.tableData = this.tableData.filter(e => {
+        // 移除 userId 为空的项
+        if (e.userId == null) {
+          return false;
+        }
+
+        // 清理并判断 arr 是否为空
+        e.arr = e.arr.filter(t => t.machineId != null && t.schTime != null);
+        return e.arr.length > 0;
+      });
+    },
+
+
+
+
     //监控机器id变化
-    machineChange() {
+    watchMachineChange() {
       this.tableData.forEach((item, index) => {
         this.$watch(
           function () {
