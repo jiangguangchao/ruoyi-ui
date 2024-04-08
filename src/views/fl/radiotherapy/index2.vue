@@ -1,67 +1,49 @@
 <template>
   <div>
     <el-table :data="tableData" :span-method="handleSpanMethod" border style="width: 100%">
-    <!-- <el-table :data="tableData" border style="width: 100%"> -->
+      <!-- <el-table :data="tableData" border style="width: 100%"> -->
       <el-table-column prop="machineName" label="放疗机器"></el-table-column>
       <el-table-column prop="hzXm" label="患者姓名"></el-table-column>
       <el-table-column prop="schTime" label="治疗时间"></el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleSchedule(scope.row)"
-            v-hasPermi="['fl:radiotherapy:edit']"
-          >时间安排</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleRemoveSchTime(scope.row)"
-            v-hasPermi="['fl:radiotherapy:edit']"
-          >移除时间</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['fl:radiotherapy:remove']"
-          >删除</el-button>
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleSchedule(scope.row)"
+            v-hasPermi="['fl:radiotherapy:edit']">时间安排</el-button>
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleRemoveSchTime(scope.row)"
+            v-hasPermi="['fl:radiotherapy:edit']">移除时间</el-button>
+          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
+            v-hasPermi="['fl:radiotherapy:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <!-- 添加或修改放射治疗对话框 -->
-        <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-          <el-form ref="form" :model="form" label-width="80px">
-            <el-form-item label="放疗单编号" prop="fldId" >
-              <el-input v-model="form.fldId" placeholder="请输入放疗单编号" />
-            </el-form-item>
-            <el-form-item label="机器" prop="machineId" disabled>
-              <el-input v-model="form.machineName" placeholder="请输入机器编号" disabled/>
-            </el-form-item>
+    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+      <el-form ref="form" :model="form" label-width="80px">
+        <el-form-item label="放疗单编号" prop="fldId">
+          <el-input v-model="form.fldId" placeholder="请输入放疗单编号" />
+        </el-form-item>
+        <el-form-item label="机器" prop="machineId" disabled>
+          <el-input v-model="form.machineName" placeholder="请输入机器编号" disabled />
+        </el-form-item>
 
-            <el-form-item label="预计治疗时间" prop="schTime">
-              <el-date-picker clearable size="small"
-                v-model="form.schTime"
-                type="datetime"
-                value-format="yyyy-MM-dd HH:00"
-                placeholder="选择预计治疗时间">
-              </el-date-picker>
-            </el-form-item>
-          </el-form>
-          <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="submitForm">确 定</el-button>
-            <el-button @click="cancel">取 消</el-button>
-          </div>
-        </el-dialog>
+        <el-form-item label="预计治疗时间" prop="schTime">
+          <el-date-picker clearable size="small" v-model="form.schTime" type="datetime" value-format="yyyy-MM-dd HH:00"
+            placeholder="选择预计治疗时间">
+          </el-date-picker>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
 
   </div>
 </template>
 
 <script>
-import { listRadiotherapy, getRadiotherapy, delRadiotherapy, addRadiotherapy, updateRadiotherapy , removeSchTime} from "@/api/fl/radiotherapy";
+import { listRadiotherapy, getRadiotherapy, delRadiotherapy, addRadiotherapy, updateRadiotherapy, removeSchTime } from "@/api/fl/radiotherapy";
 export default {
   dicts: ['sys_yes_no', 'fszl_zt'],
   data() {
@@ -115,9 +97,9 @@ export default {
 
     handleSchedule(row) {
       console.log("当前row", row)
-        this.form = row;
-        this.open = true;
-        this.title = "修改放射治疗";
+      this.form = row;
+      this.open = true;
+      this.title = "修改放射治疗";
     },
 
     handleRemoveSchTime(row) {
@@ -150,17 +132,17 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除放射治疗编号为"' + ids + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除放射治疗编号为"' + ids + '"的数据项？').then(function () {
         return delRadiotherapy(ids);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+      }).catch(() => { });
     },
 
     handleSpanMethod({ row, column, rowIndex, columnIndex }) {
 
-      if(this.open) {
+      if (this.open) {
         return;
       }
       if (columnIndex === 0) {
