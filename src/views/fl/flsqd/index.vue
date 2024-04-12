@@ -631,14 +631,7 @@
 
     <!--流程详情-->
     <el-dialog :visible.sync="lcDetailOpen" title="选择操作人员" width="900px">
-      <!-- <div class="flowchart">
-        <div v-for="(step, index) in steps" :key="index" class="step">
-          <div class="stepDoing">
-            <p> {{ step.lcname }} -- {{ step.operator }} - {{ step.date }} </p>
-          </div>
-        </div>
-      </div> -->
-      <lcDetail></lcDetail>
+      <lcDetail :selectId="selectId"></lcDetail>
     </el-dialog>
 
 
@@ -739,6 +732,7 @@ export default {
       selectedWorker: null,
       selectedRow: null,
       lcDetailOpen: false,
+      selectId: null,
       addFlag:true,
 
       flsqdDetailOpen: false,
@@ -1072,6 +1066,7 @@ export default {
     //openLCDig
     openLCDig(row) {
       this.lcDetailOpen = true;
+      this.selectId = row.id;
       this.getFllcDetail(row);
     },
 

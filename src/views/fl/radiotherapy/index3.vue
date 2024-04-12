@@ -1,12 +1,12 @@
 <template>
   <div>
-    <!-- <vue-mermaid
+    <vue-mermaid
     :nodes="data"
     type="graph LR"
-    ></vue-mermaid> -->
-    <pre class="mermaid">
+    ></vue-mermaid>
+    <!-- <pre class="mermaid">
           {{ code }}
-    </pre>
+    </pre> -->
   </div>
 </template>
 
@@ -42,9 +42,9 @@ export default {
   },
 
   created() {
-    this.showNodes();
+    // this.showNodes();
   },
-  
+
   methods: {
 
     getCode() {
