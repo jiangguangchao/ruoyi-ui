@@ -23,7 +23,8 @@
           <size-select id="size-select" class="right-menu-item hover-effect" />
         </el-tooltip> -->
 
-        <el-tag type="success" size="medium" effect="dark">靶区勾画</el-tag>
+        <el-tag type="success" @click="showUserListAtPost" size="medium" effect="dark">靶区勾画</el-tag>
+
 
       </template>
 
@@ -45,6 +46,7 @@
         </el-dropdown-menu>
       </el-dropdown>
     </div>
+    <AssignWork ref="AssignWork" />
   </div>
 </template>
 
@@ -58,6 +60,7 @@ import SizeSelect from '@/components/SizeSelect'
 import Search from '@/components/HeaderSearch'
 import RuoYiGit from '@/components/RuoYi/Git'
 import RuoYiDoc from '@/components/RuoYi/Doc'
+import  AssignWork from '@/views/system/post/assignWork.vue'
 
 export default {
   components: {
@@ -68,7 +71,8 @@ export default {
     SizeSelect,
     Search,
     RuoYiGit,
-    RuoYiDoc
+    RuoYiDoc,
+    AssignWork
   },
   computed: {
     ...mapGetters([
@@ -107,6 +111,10 @@ export default {
           location.href = '/index';
         })
       }).catch(() => {});
+    },
+    showUserListAtPost() {
+      console.log("---", this.$store.state.user.postCode);
+      this.$refs.AssignWork.openDia(this.$store.state.user.postCode)
     }
   }
 }

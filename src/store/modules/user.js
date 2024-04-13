@@ -7,7 +7,8 @@ const user1 = {
     name: '',
     avatar: '',
     roles: [],
-    permissions: []
+    permissions: [],
+    postCode: ''
   },
 
   mutations: {
@@ -25,6 +26,9 @@ const user1 = {
     },
     SET_PERMISSIONS: (state, permissions) => {
       state.permissions = permissions
+    },
+    SET_POSTCODE: (state, postCode) => {
+      state.postCode = postCode
     }
   },
 
@@ -60,6 +64,7 @@ const user1 = {
           }
           commit('SET_NAME', user.userName)
           commit('SET_AVATAR', avatar)
+          commit('SET_POSTCODE', user.postCode)
           resolve(res)
         }).catch(error => {
           reject(error)

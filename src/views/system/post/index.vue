@@ -162,7 +162,7 @@
       </div>
     </el-dialog>
 
-    <AssignWork :assignWorkOpen="assignWorkOpen" :assignWorkPostCode="assignWorkPostCode" @update:assignWorkOpen="handleAssignWorkDialogClose"></AssignWork>
+    <AssignWork ref="AssignWork"></AssignWork>
 
 
 
@@ -328,12 +328,9 @@ export default {
     },
 
     showAssignWorkDialog(row) {
-      this.assignWorkPostCode = row.postCode;
-      this.assignWorkOpen = true;
+      this.$refs.AssignWork.openDia(row.postCode);
     },
-    handleAssignWorkDialogClose(newVal) {
-      this.assignWorkOpen=newVal
-    }
+    
 
   }
 };
