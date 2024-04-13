@@ -1,34 +1,40 @@
 <template>
   <div>
-    <vue-mermaid :nodes="nodes" type="graph TD"></vue-mermaid>
+    <el-dialog :visible.sync="open" title="流程图" width="80%" :before-close="handleClose">
+      <vue-mermaid :nodes="nodes" type="graph TD"></vue-mermaid>
+    </el-dialog>
   </div>
 </template>
 
 
 <script>
   import {
-    listFllcjl,
     getFllcjl
   } from "@/api/fl/fllcjl";
   export default {
     dicts: ['fl_lc'],
-    props: ['selectId'],
     data() {
       return {
+        open: false,
         nodes:[],
       };
     },
-    created() {
-      this.getNodes(this.selectId);
-    },
     methods: {
+
+      openDia(fld){
+        this.getNodes(fld.id);
+        
+      },
+      handleClose(){
+        this.nodes = [];
+        this.open = false;
+      },
+
       getNodes(fldId) {
         getFllcjl(fldId).then(response => {
-          console.log("查看到放疗单流程记录", response.data)
-
           this.dict.type.fl_lc.forEach((e, index)=>{
-            let obj = response.data.find(t=>t.lcjdmc == e.value)
 
+            let obj = response.data.find(t=>t.lcjdmc == e.value)
             let node = {
               id: index,
               text: e.label,
@@ -53,24 +59,10 @@
             if (index === this.dict.type.fl_lc.length - 1) {
               node.next = null;
             }
-
             this.nodes.push(node);
-            // console.log("nodes:", this.nodes)
-
           })
 
-          // response.data.forEach((e, index)=>{
-          //   let node = {
-          //     id: index,
-          //     text: e.lcjdmc + "-" + e.czrmc + "-" + e.czsj,
-          //     next:[index + 1],
-          //     style: "fill:#7FFFAA"
-          //   }
-          //   if (index === response.data.length - 1) {
-          //     node.next = null;
-          //   }
-          //   this.nodes.push(node);
-          // })
+          this.open = true;
         })
       },
     },

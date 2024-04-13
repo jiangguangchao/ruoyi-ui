@@ -350,7 +350,7 @@
             size="mini"
             type="text"
             icon="el-icon-edit"
-            @click="openDetail(scope.row)"
+            @click="openDetailDig(scope.row)"
           >详情</el-button>
         </template>
       </el-table-column>
@@ -627,59 +627,21 @@
       </span>
     </el-dialog>
 
-    <flsqdDetail :flsqdDetailOpen="flsqdDetailOpen" :flsqdId="flsqdId" :flsqdObj="flsqdObj" @update:flsqdDetailOpen="closeDetail"></flsqdDetail>
-
-    <!--流程详情-->
-    <el-dialog :visible.sync="lcDetailOpen" title="选择操作人员" width="900px">
-      <lcDetail :selectId="selectId"></lcDetail>
-    </el-dialog>
-
-
-
+    <flsqdDetail ref="flsqdDetail"></flsqdDetail>
+    
+    <lcDetail ref="lcDetail"></lcDetail>
 
   </div>
 </template>
 
 
-<style scoped>
-  .flowchart {
-    display: flex;
-    align-items: center;
-  }
-
-
-
-
-
-  .step {
-    width: 200px;
-    margin-right: 20px;
-    background-color: #f5f5f5;
-    padding: 10px;
-    border-radius: 4px;
-  }
-
-  .stepDone {
-    background-color: #45e520;
-  }
-
-  .stepDoing {
-    color: ##e14012;
-  }
-
-
-</style>
-
 <script>
 import { listFlsqd, getFlsqd, delFlsqd, addFlsqd, updateFlsqd, startFlsqd, signFlsqd } from "@/api/fl/flsqd";
-import { listFllcjl, getFllcjl } from "@/api/fl/fllcjl";
+import { listFllcjl } from "@/api/fl/fllcjl";
 import { allUser } from "@/api/system/user";
 import  flsqdDetail  from "./flsqdDetail.vue";
 import { newId } from "../../../api/fl/flsqd";
 import lcDetail from "./lcDetail.vue";
-// import mermaid from 'mermaid';
-// import 'mermaid/dist/mermaid.css'; // 引入Mermaid样式文件
-// import mermaidConfig from '@/mermaid.config'; // 引入Mermaid配置文件
 
 export default {
   name: "Flsqd",
@@ -731,8 +693,6 @@ export default {
       allocateDigOpen: false,
       selectedWorker: null,
       selectedRow: null,
-      lcDetailOpen: false,
-      selectId: null,
       addFlag:true,
 
       flsqdDetailOpen: false,
@@ -877,15 +837,12 @@ export default {
         this.total = response.total;
         this.loading = false;
         this.flsqdList.forEach(d=>{
-          console.log("当前申请单用户id", d.dqczry)
           this.userList.forEach(u=>{
             if (u.userId === d.dqczry) {
               d.dqczrymc = u.userName
             }
           })
         })
-
-        console.log("放疗申请单", this.flsqdList)
       });
     },
     // 取消按钮
@@ -1065,41 +1022,11 @@ export default {
     },
     //openLCDig
     openLCDig(row) {
-      this.lcDetailOpen = true;
-      this.selectId = row.id;
-      this.getFllcDetail(row);
+      this.$refs.lcDetail.openDia(row);
     },
 
-    getFllcDetail(row) {
-      var query = {
-        flid: row.id
-      };
-      listFllcjl(query).then(response=> {
-        var stepList = response.rows;
-        if (stepList == undefined || stepList == null) {
-          console.log("当前放疗单流程详情为空")
-          return;
-        } else {
-          // console.log("当前放疗单流程详情", stepList)
-          for(var i = 0; i < stepList.length; i++) {
-
-            this.steps[i].operator = this.getUserNameById(stepList[i].czr);
-            this.steps[i].date = stepList[i].czsj;
-
-            // console.log("当前放疗单流程详情 item ", stepList[i].czr)
-            // console.log("当前放疗单流程详情 i ", stepList[i].czr)
-            // console.log("当前放疗单流程详情 this.steps[i].operator ", this.steps[i].operator)
-          }
-
-          // console.log("当前放疗单流程详情 steps ", this.steps)
-        }
-
-      });
-    },
-
-    openDetail(row) {
-      this.flsqdDetailOpen = true
-      this.flsqdId=row.id
+    openDetailDig(row) {
+      this.$refs.flsqdDetail.openDia(row);
     },
     closeDetail() {
       this.flsqdDetailOpen = false
