@@ -5,41 +5,56 @@
       <el-table-column label="序号" type="index" align="center" />
       <el-table-column label="人员名称" align="center" prop="userName" />
     </el-table>
+    <button @click="refushList">刷新</button>
   </el-dialog>
 </template>
 
 <script>
 
-import { listUser } from "@/api/fl/assignwork";
+import { listUser, refreshListUser } from "@/api/fl/assignwork";
 
 export default {
-  
+
   data() {
     return {
       open: false,
+      postCode: null,
       assignWorkUserList:[],
       assignWorkTitle:"岗位任务分配顺序",
     }
   },
-  
+
   methods: {
     openDia(postCode) {
       this.getUsers(postCode);
     },
     closeDia() {
+      this.postCode = null;
       this.open = false;
     },
 
     getUsers(postCode) {
-      console.log("全局用户信息", this.$store.state.user.postCode)
       console.log("开始查询岗位用户", postCode)
       if (postCode == undefined || postCode == null || postCode == '') {
         console.log("获取到postCode为空，无法查询")
         return;
       }
+      this.postCode = postCode
       listUser({"postCode": postCode}).then(response => {
         this.assignWorkUserList = response;
         this.open = true;
+      });
+    },
+
+    refushList() {
+      const postCode = this.postCode
+      console.log("开始查询岗位用户", postCode)
+      if (postCode == undefined || postCode == null || postCode == '') {
+        console.log("获取到postCode为空，无法查询")
+        return;
+      }
+      refreshListUser({"postCode": postCode}).then(response => {
+        this.assignWorkUserList = response;
       });
     },
   }

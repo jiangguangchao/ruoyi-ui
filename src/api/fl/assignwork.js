@@ -8,3 +8,11 @@ export function listUser(query) {
     params: query
   })
 }
+
+export function refreshListUser(query) {
+  return request({
+    url: '/fl/assignWork/refresh',
+    method: 'get',
+    params: query
+  })
+}
