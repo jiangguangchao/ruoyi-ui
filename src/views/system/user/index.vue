@@ -284,7 +284,7 @@
         <el-row>
           <el-col :span="12">
             <el-form-item label="岗位">
-              <el-select v-model="form.postId" placeholder="请选择">
+              <el-select v-model="form.postIds" multiple placeholder="请选择">
                 <el-option
                   v-for="item in postOptions"
                   :key="item.postId"
@@ -602,12 +602,11 @@ export default {
       this.getTreeselect();
       const userId = row.userId || this.ids;
       getUser(userId).then(response => {
-        response.data.postId = response.postIds.length == 0 ? undefined : response.postIds[0];
+        // response.data.postId = response.postIds.length == 0 ? undefined : response.postIds[0];
         this.form = response.data;
         this.postOptions = response.posts;
         this.roleOptions = response.roles;
         this.form.postIds = response.postIds;
-        // this.form.postId = response.postIds.length == 0 ? undefined : response.postIds[0];
         this.form.roleIds = response.roleIds;
         this.open = true;
         this.title = "修改用户";
@@ -638,7 +637,7 @@ export default {
     submitForm: function() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          this.form.postIds[0] = this.form.postId;
+          // this.form.postIds[0] = this.form.postId;
           if (this.form.userId != undefined) {
             updateUser(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
