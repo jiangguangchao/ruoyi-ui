@@ -436,6 +436,7 @@ import { listFllcjl } from "@/api/fl/fllcjl";
 import { allUser } from "@/api/system/user";
 import flsqdDetail from "./flsqdDetail.vue";
 import { newId } from "../../../api/fl/flsqd";
+import { listUser as listPostUser } from "@/api/fl/assignwork";
 import lcDetail from "./lcDetail.vue";
 
 export default {
@@ -781,7 +782,7 @@ export default {
       }, `flsqd_${new Date().getTime()}.xlsx`)
     },
     openAlloctDig(row) {
-      this.postUserList = this.userList.filter(u => u.postCode == row.dqlcjdmc);
+      this.getPostUser(row.dqlcjdmc)
       console.log("岗位用户：", this.postUserList);
       this.allocateDigOpen = true;
       this.selectedWorker = row.dqczry;
@@ -843,7 +844,13 @@ export default {
         }
       })
       return userName;
-    }
+    },
+    getPostUser(postCode) {
+      listPostUser({"postCode": postCode}).then(response => {
+        this.postUserList = response;
+      });
+    },
+
   }
 };
 </script>
