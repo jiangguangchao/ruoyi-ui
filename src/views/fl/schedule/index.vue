@@ -5,7 +5,7 @@
         <el-input v-model="queryParams.userId" placeholder="请输入用户id" clearable size="small" />
       </el-form-item> -->
       <el-form-item label="值班日期">
-        <el-date-picker v-model="selectWeek" type="week" format="第WW周 MMdd" placeholder="选择周" @change="createWeekArr">
+        <el-date-picker v-model="selectWeek" type="week" format="第WW周 MMdd" placeholder="选择周" @change="weekChange">
         </el-date-picker>
       </el-form-item>
       <el-form-item>
@@ -15,7 +15,7 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button type="success" plain icon="el-icon-edit" size="mini" @click="handleUpdate"
+        <el-button v-if="showEditBut" type="success" plain icon="el-icon-edit" size="mini" @click="handleUpdate"
           v-hasPermi="['fl:schedule:edit']">修改</el-button>
       </el-col>
       <!-- <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar> -->
@@ -127,6 +127,7 @@ export default {
       tableData: [],
       userArr: [],
       selectWeek: null,
+      showEditBut: true,
 
       machineArr: [],
       week: [{
@@ -260,6 +261,8 @@ export default {
     // this.getList();
     this.getUser();
     this.getMachine();
+    this.selectWeek = this.getMonday();
+    this.weekChange();
   },
   methods: {
 
@@ -302,6 +305,10 @@ export default {
 
     /** 修改按钮操作 */
     handleUpdate() {
+      if (this.selectWeek == null) {
+        this.$modal.msgError("请选择日期");
+        return;
+      }
       this.editFlag = true;
       this.buildEditTableData();
     },
@@ -343,7 +350,21 @@ export default {
       });
     },
 
+    weekChange() {
+      this.createWeekArr();
+      this.getList();
+
+      if (this.selectWeek.getTime() < this.getMonday().getTime()) {
+        this.showEditBut = false;
+      } else {
+        this.showEditBut = true;
+      }
+
+    },
+
     createWeekArr() {
+      this.resetWeekArr();
+      console.log("周", this.selectWeek)
       for (let i = 0; i < this.week.length; i++) {
         let date = new Date(this.selectWeek.getTime() + 24 * 60 * 60 * 1000 * i);
         //date转字符串
@@ -356,9 +377,31 @@ export default {
 
     //根据userArr填充tableData
     buildEditTableData(){
+
+      if (this.tableData == null || this.tableData == undefined) {
+          this.tableData = [];
+        }
+
       this.userArr.forEach((item, index) => {
-        //如果userId在tableData中不存在，则在tableData中添加
-        if (this.tableData.findIndex(e => e.userId == item.userId) == -1) {
+
+        console.log("this.tableData", this.tableData)
+
+        if (this.tableData == null || this.tableData.length == 0) {
+          let arr = [];
+          for (let i = 0; i < this.week.length; i++) {
+            arr.push({
+              machineId: null,
+              schTime: null,
+            });
+          }
+
+          this.tableData.push({
+            userId: item.userId,
+            tb: '1',
+            db: '0',
+            arr: arr
+          })
+        } else if (this.tableData.findIndex(e => e.userId == item.userId) == -1) {
           var arr = [];
           for (let i = 0; i < this.week.length; i++) {
             arr.push({
@@ -452,6 +495,52 @@ export default {
         return '';
       }
       return m.userName;
+    },
+
+    //获取本周周一的日期,且时分秒都是00:00:00
+    getMonday() {
+      var now = new Date();
+      var nowTime = now.getTime();
+      var day = now.getDay();
+      var oneDayLong = 24 * 60 * 60 * 1000;
+      var mondayTime = nowTime - (day - 1) * oneDayLong;
+      var monday = new Date(mondayTime);
+      monday.setHours(0, 0, 0, 0);
+      console.log("本周周一", monday)
+      return monday;  
+      
+    },
+
+    resetWeekArr() {
+      this.week = [{
+        id: 1,
+        name: '周一'
+      },
+      {
+        id: 2,
+        name: '周二'
+      },
+      {
+        id: 3,
+        name: '周三'
+      },
+      {
+        id: 4,
+        name: '周四'
+      },
+      {
+        id: 5,
+        name: '周五'
+      },
+      {
+        id: 6,
+        name: '周六'
+      },
+      {
+        id: 7,
+        name: '周日'
+      },
+      ]
     },
   },
 
