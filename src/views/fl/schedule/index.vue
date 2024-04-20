@@ -353,6 +353,7 @@ export default {
     weekChange() {
       this.createWeekArr();
       this.getList();
+      console.log("weekChange方法中，this.getList()后", this.tableData)
 
       if (this.selectWeek.getTime() < this.getMonday().getTime()) {
         this.showEditBut = false;
