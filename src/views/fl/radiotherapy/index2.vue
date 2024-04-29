@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-table :data="tableData" :span-method="handleSpanMethod" border style="width: 100%">
+    <el-table :data="tableData" border style="width: 100%">
       <!-- <el-table :data="tableData" border style="width: 100%"> -->
       <el-table-column prop="machineName" label="放疗机器"></el-table-column>
       <el-table-column prop="hzXm" label="患者姓名"></el-table-column>
