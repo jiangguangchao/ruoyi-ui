@@ -46,10 +46,12 @@
 
       <el-table-column :label="item.name" width="230" v-for="(item, index) in week">
         <template slot-scope="scope">
-          <CellSel :machineId="scope.row.arr[index].machineId" 
+          <CellSel :machineId="scope.row.arr[index].machineId"
+            :schTime = "scope.row.arr[index].schTime"
             :machineArr="machineArr"
             :index="index"
             :row="scope.row"
+            :userArr="userArr"
           ></CellSel>
         </template>
       </el-table-column>
@@ -97,7 +99,7 @@ import CellSel from './cellSel.vue';
 export default {
   name: "Schedule",
   dicts: ['zhibansj'],
-  
+
   data() {
     return {
 
@@ -264,8 +266,11 @@ export default {
       this.queryParams.params["beginTime"] = this.week[0].date;
       this.queryParams.params["endTime"] = this.week[6].date;
       tableList(this.queryParams).then(response => {
-        console.log("查询到排班", response.data)
+        // console.log("查询到排班", response.data)
         this.tableData = response.data;
+        if (this.tableData == null || this.tableData == undefined) {
+          return;
+        }
         this.tableData.forEach(e => {
           e.arr.forEach(e1 => {
             if (e1.machineId != null) {
@@ -276,14 +281,14 @@ export default {
           });
         });
         console.log("--this.tableData", this.tableData)
-        this.buildEditTableData();
-        this.watchMachineChange();
+        // this.buildEditTableData();
+
       });
     },
 
     getUser() {
       getUserByPostCode('jishi').then(response => {
-        console.log("查询到用户", response.data)
+        // console.log("查询到用户", response.data)
         this.userArr = response.data
       });
     },
@@ -305,6 +310,7 @@ export default {
       }
       this.editFlag = true;
       this.buildEditTableData();
+      this.watchMachineChange();
     },
     /** 提交按钮 */
     submitForm() {
@@ -338,7 +344,7 @@ export default {
         }
 
       }
-      console.log("提交数据", dataList)
+      // console.log("提交数据", dataList)
       save(dataList).then(response => {
         this.$modal.msgSuccess("提交成功");
       });
@@ -347,7 +353,7 @@ export default {
     weekChange() {
       this.createWeekArr();
       this.getList();
-      console.log("weekChange方法中，this.getList()后", this.tableData)
+      // console.log("weekChange方法中，this.getList()后", this.tableData)
 
       if (this.selectWeek.getTime() < this.getMonday().getTime()) {
         this.showEditBut = false;
@@ -359,7 +365,7 @@ export default {
 
     createWeekArr() {
       this.resetWeekArr();
-      console.log("周", this.selectWeek)
+      // console.log("周", this.selectWeek)
       for (let i = 0; i < this.week.length; i++) {
         let date = new Date(this.selectWeek.getTime() + 24 * 60 * 60 * 1000 * i);
         //date转字符串
@@ -367,7 +373,7 @@ export default {
         this.week[i].date = date;
         this.week[i].name = this.week[i].name + " " + date;
       }
-      console.log("日期", this.week)
+      // console.log("日期", this.week)
     },
 
     //根据userArr填充tableData
@@ -379,7 +385,7 @@ export default {
 
       this.userArr.forEach((item, index) => {
 
-        console.log("this.tableData", this.tableData)
+        // console.log("this.tableData", this.tableData)
 
         if (this.tableData == null || this.tableData.length == 0) {
           let arr = [];
@@ -481,7 +487,7 @@ export default {
     },
 
     getUserNameById(id) {
-      console.log("userArr", this.userArr);
+      // console.log("userArr", this.userArr);
       if (id == null || id == undefined) {
         return '';
       }
@@ -501,9 +507,9 @@ export default {
       var mondayTime = nowTime - (day - 1) * oneDayLong;
       var monday = new Date(mondayTime);
       monday.setHours(0, 0, 0, 0);
-      console.log("本周周一", monday)
-      return monday;  
-      
+      // console.log("本周周一", monday)
+      return monday;
+
     },
 
     resetWeekArr() {
