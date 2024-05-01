@@ -102,6 +102,11 @@
           <span>{{ parseTime(scope.row.hzSr, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="已支付/已治疗/总治疗次数" align="center" prop="hzXm">
+        <template slot-scope="scope">
+          <span>{{ scope.row.paidCount + "/" + scope.row.curedCount + "/" + scope.row.cureCount }}</span>
+        </template>
+      </el-table-column>
       <!-- <el-table-column label="患者电话" align="center" prop="hzDh" />
       <el-table-column label="患者住院号" align="center" prop="hzZyh" />
       <el-table-column label="患者科室" align="center" prop="hzKs" />
@@ -297,12 +302,14 @@
         </el-form-item>
         <el-form-item label="扫描类型1">
           <el-radio-group v-model="form.smlx1">
-            <el-radio v-for="dict in dict.type.fl_smlx1" :key="dict.value" :label="dict.value">{{ dict.label }}</el-radio>
+            <el-radio v-for="dict in dict.type.fl_smlx1" :key="dict.value"
+              :label="dict.value">{{ dict.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="扫描类型2">
           <el-radio-group v-model="form.smlx2">
-            <el-radio v-for="dict in dict.type.fl_smlx2" :key="dict.value" :label="dict.value">{{ dict.label }}</el-radio>
+            <el-radio v-for="dict in dict.type.fl_smlx2" :key="dict.value"
+              :label="dict.value">{{ dict.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="是否空腹">
@@ -395,9 +402,19 @@
               :label="dict.value">{{ dict.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
+        <el-form-item label="总放疗次数" prop="cureCount">
+          <el-input-number v-model="form.cureCount" :min="1" :max="100" ></el-input-number>
+        </el-form-item>
+        <el-form-item label="已完成放疗次数" prop="curedCount">
+          <el-input-number v-model="form.curedCount" :min="0" :max="form.cureCount" ></el-input-number>
+        </el-form-item>
+        <el-form-item label="已支付治疗次数" prop="paidCount">
+          <el-input-number v-model="form.paidCount" :min="0" :max="form.cureCount" ></el-input-number>
+        </el-form-item>
         <el-form-item label="放疗单状态">
           <el-radio-group v-model="form.fldzt">
-            <el-radio v-for="dict in dict.type.fl_fldzt" :key="dict.value" :label="dict.value">{{ dict.label }}</el-radio>
+            <el-radio v-for="dict in dict.type.fl_fldzt" :key="dict.value"
+              :label="dict.value">{{ dict.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="初始放疗单" prop="fuid">
@@ -431,426 +448,546 @@
 
 
 <script>
-import { listFlsqd, getFlsqd, delFlsqd, addFlsqd, updateFlsqd, startFlsqd, signFlsqd } from "@/api/fl/flsqd";
-import { listFllcjl } from "@/api/fl/fllcjl";
-import { allUser } from "@/api/system/user";
-import flsqdDetail from "./flsqdDetail.vue";
-import { newId } from "../../../api/fl/flsqd";
-import { listUser as listPostUser } from "@/api/fl/assignwork";
-import lcDetail from "./lcDetail.vue";
+  import {
+    listFlsqd,
+    getFlsqd,
+    delFlsqd,
+    addFlsqd,
+    updateFlsqd,
+    startFlsqd,
+    signFlsqd
+  } from "@/api/fl/flsqd";
+  import {
+    listFllcjl
+  } from "@/api/fl/fllcjl";
+  import {
+    allUser
+  } from "@/api/system/user";
+  import flsqdDetail from "./flsqdDetail.vue";
+  import {
+    newId
+  } from "../../../api/fl/flsqd";
+  import {
+    listUser as listPostUser
+  } from "@/api/fl/assignwork";
+  import lcDetail from "./lcDetail.vue";
 
-export default {
-  name: "Flsqd",
-  dicts: ['fl_zljq', 'fl_fldzt', 'fl_zljs', 'fl_gdfs', 'fl_txrhlx', 'fl_igrtpllx', 'sys_yes_no', 'sys_user_sex', 'fl_smlx1', 'fl_IGRT', 'fl_smlx2', 'fl_lc'],
-  data() {
-    return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
-      total: 0,
-      // 放疗申请单表格数据
-      flsqdList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
-      queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        id: null,
-        hzXm: null,
-        hzXb: null,
-        hzFlys: null,
-        gdfs: null,
-        txrhlx: null,
-        zljs: null,
-        zljq: null,
-        igrt: null,
-        jlyz: null,
-        dqlcjdmc: null,
-        dqczry: null,
-        fldzt: null,
-      },
-      // 表单参数
-      form: {},
-      //所有用户
-      userList: [],
-      //(某个)岗位用户
-      postUserList: [],
-      allocateDigOpen: false,
-      selectedWorker: null,
-      selectedRow: null,
-      addFlag: true,
+  export default {
+    name: "Flsqd",
+    dicts: ['fl_zljq', 'fl_fldzt', 'fl_zljs', 'fl_gdfs', 'fl_txrhlx', 'fl_igrtpllx', 'sys_yes_no', 'sys_user_sex',
+      'fl_smlx1', 'fl_IGRT', 'fl_smlx2', 'fl_lc'
+    ],
+    data() {
+      return {
+        // 遮罩层
+        loading: true,
+        // 选中数组
+        ids: [],
+        // 非单个禁用
+        single: true,
+        // 非多个禁用
+        multiple: true,
+        // 显示搜索条件
+        showSearch: true,
+        // 总条数
+        total: 0,
+        // 放疗申请单表格数据
+        flsqdList: [],
+        // 弹出层标题
+        title: "",
+        // 是否显示弹出层
+        open: false,
+        // 查询参数
+        queryParams: {
+          pageNum: 1,
+          pageSize: 10,
+          id: null,
+          hzXm: null,
+          hzXb: null,
+          hzFlys: null,
+          gdfs: null,
+          txrhlx: null,
+          zljs: null,
+          zljq: null,
+          igrt: null,
+          jlyz: null,
+          dqlcjdmc: null,
+          dqczry: null,
+          fldzt: null,
+        },
+        // 表单参数
+        form: {},
+        //所有用户
+        userList: [],
+        //(某个)岗位用户
+        postUserList: [],
+        allocateDigOpen: false,
+        selectedWorker: null,
+        selectedRow: null,
+        addFlag: true,
 
-      flsqdDetailOpen: false,
-      flsqdId: null,
-      flsqdObj: null,
-      newId: null,
-      processNodes: ['节点1', '节点2', '节点3', '节点4'],
+        flsqdDetailOpen: false,
+        flsqdId: null,
+        flsqdObj: null,
+        newId: null,
+        processNodes: ['节点1', '节点2', '节点3', '节点4'],
 
 
-      steps: [
-        { operator: '', date: '', lc: 'dw', lcname: '定位' },
-        { operator: '', date: '', lc: 'bqgh', lcname: '靶区勾画' },
-        { operator: '', date: '', lc: 'bqhz', lcname: '靶区核准' },
-        { operator: '', date: '', lc: 'bqtj', lcname: '靶区提交' },
-        { operator: '', date: '', lc: 'jhsj', lcname: '计划设计' },
-        { operator: '', date: '', lc: 'jhhz', lcname: '计划核准' },
-        { operator: '', date: '', lc: 'fwyz', lcname: '复位验证' },
-      ],
+        steps: [{
+            operator: '',
+            date: '',
+            lc: 'dw',
+            lcname: '定位'
+          },
+          {
+            operator: '',
+            date: '',
+            lc: 'bqgh',
+            lcname: '靶区勾画'
+          },
+          {
+            operator: '',
+            date: '',
+            lc: 'bqhz',
+            lcname: '靶区核准'
+          },
+          {
+            operator: '',
+            date: '',
+            lc: 'bqtj',
+            lcname: '靶区提交'
+          },
+          {
+            operator: '',
+            date: '',
+            lc: 'jhsj',
+            lcname: '计划设计'
+          },
+          {
+            operator: '',
+            date: '',
+            lc: 'jhhz',
+            lcname: '计划核准'
+          },
+          {
+            operator: '',
+            date: '',
+            lc: 'fwyz',
+            lcname: '复位验证'
+          },
+        ],
 
-      // 表单校验
-      rules: {
-        hzXm: [
-          { required: true, message: "患者姓名不能为空", trigger: "blur" }
-        ],
-        hzXb: [
-          { required: true, message: "患者性别不能为空", trigger: "change" }
-        ],
-        hzSr: [
-          { required: true, message: "患者出生年月不能为空", trigger: "blur" }
-        ],
-        hzDh: [
-          { required: true, message: "患者电话不能为空", trigger: "blur" }
-        ],
-        hzFlys: [
-          { required: true, message: "患者放疗医生不能为空", trigger: "blur" }
-        ],
-        hzTbhl: [
-          { required: true, message: "患者同步化疗不能为空", trigger: "blur" }
-        ],
-        hzBs: [
-          { required: true, message: "患者病史/诊断不能为空", trigger: "blur" }
-        ],
-        gdfs: [
-          { required: true, message: "固定方式不能为空", trigger: "change" }
-        ],
-        smsj: [
-          { required: true, message: "扫描上界不能为空", trigger: "blur" }
-        ],
-        smzx: [
-          { required: true, message: "扫描中心不能为空", trigger: "blur" }
-        ],
-        smxj: [
-          { required: true, message: "扫描下界不能为空", trigger: "blur" }
-        ],
-        ch: [
-          { required: true, message: "层厚不能为空", trigger: "blur" }
-        ],
-        smlx1: [
-          { required: true, message: "扫描类型1不能为空", trigger: "blur" }
-        ],
-        smlx2: [
-          { required: true, message: "扫描类型2不能为空", trigger: "blur" }
-        ],
-        kf: [
-          { required: true, message: "是否空腹不能为空", trigger: "blur" }
-        ],
-        hes: [
-          { required: true, message: "喝水毫升数不能为空", trigger: "blur" }
-        ],
-        bn: [
-          { required: true, message: "是否憋尿不能为空", trigger: "blur" }
-        ],
-        qsbj: [
-          { required: true, message: "是否铅丝标记不能为空", trigger: "blur" }
-        ],
-        bolus: [
-          { required: true, message: "是否BOLUS不能为空", trigger: "blur" }
-        ],
-        khp: [
-          { required: true, message: "是否口含瓶不能为空", trigger: "blur" }
-        ],
-        qit: [
-          { required: true, message: "其它不能为空", trigger: "blur" }
-        ],
-        txrhlx: [
-          { required: true, message: "图像融合类型不能为空", trigger: "change" }
-        ],
-        txrhbh: [
-          { required: true, message: "图像融合编号不能为空", trigger: "blur" }
-        ],
-        cdw: [
-          { required: true, message: "是否重定位不能为空", trigger: "blur" }
-        ],
-        zljs: [
-          { required: true, message: "治疗技术不能为空", trigger: "change" }
-        ],
-        zljq: [
-          { required: true, message: "治疗机器不能为空", trigger: "change" }
-        ],
-        igrt: [
-          { required: true, message: "IGRT不能为空", trigger: "change" }
-        ],
-        igrtpllx: [
-          { required: true, message: "IGRT频率类型不能为空", trigger: "change" }
-        ],
-        igrtplz: [
-          { required: true, message: "IGRT频率值不能为空", trigger: "blur" }
-        ],
-        hxmk: [
-          { required: true, message: "是否呼吸门控不能为空", trigger: "blur" }
-        ],
-        jlyz: [
-          { required: true, message: "是否剂量验证不能为空", trigger: "blur" }
-        ],
-        dqczry: [
-          { required: true, message: "当前所属操作人员不能为空", trigger: "blur" }
-        ],
-        fldzt: [
-          { required: true, message: "放疗单状态不能为空", trigger: "blur" }
-        ],
-        // fuid: [
-        //   { required: true, message: "初始放疗单不能为空", trigger: "blur" }
-        // ]
-      }
-    };
-  },
-  created() {
-    this.getUsers();
-    this.getList();
-    this.getNewId();
-  },
-  components: {
-    flsqdDetail,
-    lcDetail
-  },
-  methods: {
-    /** 查询放疗申请单列表 */
-    getList() {
-      this.loading = true;
-      listFlsqd(this.queryParams).then(response => {
-        this.flsqdList = response.rows;
-        this.total = response.total;
-        this.loading = false;
-        this.flsqdList.forEach(d => {
-          this.userList.forEach(u => {
-            if (u.userId === d.dqczry) {
-              d.dqczrymc = u.userName
-            }
-          })
-        })
-      });
-    },
-    // 取消按钮
-    cancel() {
-      this.open = false;
-      this.reset();
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        id: null,
-        myId: null,
-        hzXm: null,
-        hzXb: null,
-        hzSr: null,
-        hzDh: null,
-        hzZyh: null,
-        hzKs: null,
-        hzBfys: null,
-        hzFlys: null,
-        hzTbhl: "0",
-        hzBs: null,
-        gdfs: null,
-        smsj: null,
-        smzx: null,
-        smxj: null,
-        ch: null,
-        smlx1: "0",
-        smlx2: "0",
-        kf: "0",
-        hes: null,
-        bn: "0",
-        qsbj: "0",
-        bolus: "0",
-        khp: "0",
-        qit: null,
-        txrhlx: null,
-        txrhbh: null,
-        cdw: "0",
-        zljs: null,
-        zljq: null,
-        igrt: null,
-        igrtpllx: null,
-        igrtplz: null,
-        hxmk: "0",
-        jlyz: "0",
-        dqlcjdmc: null,
-        dqczry: null,
-        fldzt: "jxz",
-        fuid: null
+        // 表单校验
+        rules: {
+          hzXm: [{
+            required: true,
+            message: "患者姓名不能为空",
+            trigger: "blur"
+          }],
+          hzXb: [{
+            required: true,
+            message: "患者性别不能为空",
+            trigger: "change"
+          }],
+          hzSr: [{
+            required: true,
+            message: "患者出生年月不能为空",
+            trigger: "blur"
+          }],
+          hzDh: [{
+            required: true,
+            message: "患者电话不能为空",
+            trigger: "blur"
+          }],
+          hzFlys: [{
+            required: true,
+            message: "患者放疗医生不能为空",
+            trigger: "blur"
+          }],
+          hzTbhl: [{
+            required: true,
+            message: "患者同步化疗不能为空",
+            trigger: "blur"
+          }],
+          hzBs: [{
+            required: true,
+            message: "患者病史/诊断不能为空",
+            trigger: "blur"
+          }],
+          gdfs: [{
+            required: true,
+            message: "固定方式不能为空",
+            trigger: "change"
+          }],
+          smsj: [{
+            required: true,
+            message: "扫描上界不能为空",
+            trigger: "blur"
+          }],
+          smzx: [{
+            required: true,
+            message: "扫描中心不能为空",
+            trigger: "blur"
+          }],
+          smxj: [{
+            required: true,
+            message: "扫描下界不能为空",
+            trigger: "blur"
+          }],
+          ch: [{
+            required: true,
+            message: "层厚不能为空",
+            trigger: "blur"
+          }],
+          smlx1: [{
+            required: true,
+            message: "扫描类型1不能为空",
+            trigger: "blur"
+          }],
+          smlx2: [{
+            required: true,
+            message: "扫描类型2不能为空",
+            trigger: "blur"
+          }],
+          kf: [{
+            required: true,
+            message: "是否空腹不能为空",
+            trigger: "blur"
+          }],
+          hes: [{
+            required: true,
+            message: "喝水毫升数不能为空",
+            trigger: "blur"
+          }],
+          bn: [{
+            required: true,
+            message: "是否憋尿不能为空",
+            trigger: "blur"
+          }],
+          qsbj: [{
+            required: true,
+            message: "是否铅丝标记不能为空",
+            trigger: "blur"
+          }],
+          bolus: [{
+            required: true,
+            message: "是否BOLUS不能为空",
+            trigger: "blur"
+          }],
+          khp: [{
+            required: true,
+            message: "是否口含瓶不能为空",
+            trigger: "blur"
+          }],
+          qit: [{
+            required: true,
+            message: "其它不能为空",
+            trigger: "blur"
+          }],
+          txrhlx: [{
+            required: true,
+            message: "图像融合类型不能为空",
+            trigger: "change"
+          }],
+          txrhbh: [{
+            required: true,
+            message: "图像融合编号不能为空",
+            trigger: "blur"
+          }],
+          cdw: [{
+            required: true,
+            message: "是否重定位不能为空",
+            trigger: "blur"
+          }],
+          zljs: [{
+            required: true,
+            message: "治疗技术不能为空",
+            trigger: "change"
+          }],
+          zljq: [{
+            required: true,
+            message: "治疗机器不能为空",
+            trigger: "change"
+          }],
+          igrt: [{
+            required: true,
+            message: "IGRT不能为空",
+            trigger: "change"
+          }],
+          igrtpllx: [{
+            required: true,
+            message: "IGRT频率类型不能为空",
+            trigger: "change"
+          }],
+          igrtplz: [{
+            required: true,
+            message: "IGRT频率值不能为空",
+            trigger: "blur"
+          }],
+          hxmk: [{
+            required: true,
+            message: "是否呼吸门控不能为空",
+            trigger: "blur"
+          }],
+          jlyz: [{
+            required: true,
+            message: "是否剂量验证不能为空",
+            trigger: "blur"
+          }],
+          dqczry: [{
+            required: true,
+            message: "当前所属操作人员不能为空",
+            trigger: "blur"
+          }],
+          fldzt: [{
+            required: true,
+            message: "放疗单状态不能为空",
+            trigger: "blur"
+          }],
+          // fuid: [
+          //   { required: true, message: "初始放疗单不能为空", trigger: "blur" }
+          // ]
+        }
       };
-      this.resetForm("form");
     },
-    /** 搜索按钮操作 */
-    handleQuery() {
-      this.queryParams.pageNum = 1;
+    created() {
+      this.getUsers();
       this.getList();
+      this.getNewId();
     },
-    getUsers() {
-      allUser({}).then(response => {
-        this.userList = response.data
-        console.log("查询到用户", this.userList)
-      })
+    components: {
+      flsqdDetail,
+      lcDetail
     },
-    /** 重置按钮操作 */
-    resetQuery() {
-      this.resetForm("queryForm");
-      this.handleQuery();
-    },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.id)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset();
-      this.open = true;
-      this.title = "添加放疗申请单";
-      console.log("获取到新id", this.newId)
-      this.form.id = this.newId;
-      this.addFlag = true;
-      // if (this.form.id == null || this.form.id == undefined || this.form.id = '') {
-      //   console.log("获取放疗单id失败")
-      //   this.$modal.msgSuccess("获取放疗单id失败");
-      // }
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset();
-      const id = row.id || this.ids
-      getFlsqd(id).then(response => {
-        this.form = response.data;
-        this.open = true;
-        this.title = "修改放疗申请单";
-        this.addFlag = false;
-      });
-    },
-    handleStart(row) {
-      // this.reset();
-      startFlsqd(row).then(response => {
-        this.$modal.msgSuccess("开启成功");
-      });
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (!this.addFlag) {
-            updateFlsqd(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            addFlsqd(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-              this.getNewId();
-            });
-          }
-        }
-      });
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除放疗申请单编号为"' + ids + '"的数据项？').then(function () {
-        return delFlsqd(ids);
-      }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("删除成功");
-      }).catch(() => { });
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('fl/flsqd/export', {
-        ...this.queryParams
-      }, `flsqd_${new Date().getTime()}.xlsx`)
-    },
-    openAlloctDig(row) {
-      this.getPostUser(row.dqlcjdmc)
-      console.log("岗位用户：", this.postUserList);
-      this.allocateDigOpen = true;
-      this.selectedWorker = row.dqczry;
-      this.selectedRow = row;
-    },
-    allocateUser() {
-      // 在这里执行指派任务的逻辑，可以通过this.selectedWorker获取选择的工作人员ID
-      console.log('已选择的工作人员ID：', this.selectedWorker);
-      this.allocateDigOpen = false;
-
-      var selectUser = this.selectedWorker
-      this.selectedWorker = null;
-      var flsqd = {
-        id: this.selectedRow.id,
-        dqczry: selectUser
-      }
-
-      updateFlsqd(flsqd).then(response => {
-        this.$modal.msgSuccess("指派成功");
+    methods: {
+      /** 查询放疗申请单列表 */
+      getList() {
+        this.loading = true;
+        listFlsqd(this.queryParams).then(response => {
+          this.flsqdList = response.rows;
+          this.total = response.total;
+          this.loading = false;
+          this.flsqdList.forEach(d => {
+            this.userList.forEach(u => {
+              if (u.userId === d.dqczry) {
+                d.dqczrymc = u.userName
+              }
+            })
+          })
+        });
+      },
+      // 取消按钮
+      cancel() {
         this.open = false;
+        this.reset();
+      },
+      // 表单重置
+      reset() {
+        this.form = {
+          id: null,
+          myId: null,
+          hzXm: null,
+          hzXb: null,
+          hzSr: null,
+          hzDh: null,
+          hzZyh: null,
+          hzKs: null,
+          hzBfys: null,
+          hzFlys: null,
+          hzTbhl: "0",
+          hzBs: null,
+          gdfs: null,
+          smsj: null,
+          smzx: null,
+          smxj: null,
+          ch: null,
+          smlx1: "0",
+          smlx2: "0",
+          kf: "0",
+          hes: null,
+          bn: "0",
+          qsbj: "0",
+          bolus: "0",
+          khp: "0",
+          qit: null,
+          txrhlx: null,
+          txrhbh: null,
+          cdw: "0",
+          zljs: null,
+          zljq: null,
+          igrt: null,
+          igrtpllx: null,
+          igrtplz: null,
+          hxmk: "0",
+          jlyz: "0",
+          dqlcjdmc: null,
+          dqczry: null,
+          fldzt: "jxz",
+          fuid: null
+        };
+        this.resetForm("form");
+      },
+      /** 搜索按钮操作 */
+      handleQuery() {
+        this.queryParams.pageNum = 1;
         this.getList();
-      });
+      },
+      getUsers() {
+        allUser({}).then(response => {
+          this.userList = response.data
+          console.log("查询到用户", this.userList)
+        })
+      },
+      /** 重置按钮操作 */
+      resetQuery() {
+        this.resetForm("queryForm");
+        this.handleQuery();
+      },
+      // 多选框选中数据
+      handleSelectionChange(selection) {
+        this.ids = selection.map(item => item.id)
+        this.single = selection.length !== 1
+        this.multiple = !selection.length
+      },
+      /** 新增按钮操作 */
+      handleAdd() {
+        this.reset();
+        this.open = true;
+        this.title = "添加放疗申请单";
+        console.log("获取到新id", this.newId)
+        this.form.id = this.newId;
+        this.addFlag = true;
+        // if (this.form.id == null || this.form.id == undefined || this.form.id = '') {
+        //   console.log("获取放疗单id失败")
+        //   this.$modal.msgSuccess("获取放疗单id失败");
+        // }
+      },
+      /** 修改按钮操作 */
+      handleUpdate(row) {
+        this.reset();
+        const id = row.id || this.ids
+        getFlsqd(id).then(response => {
+          this.form = response.data;
+          this.open = true;
+          this.title = "修改放疗申请单";
+          this.addFlag = false;
+        });
+      },
+      handleStart(row) {
+        // this.reset();
+        startFlsqd(row).then(response => {
+          this.$modal.msgSuccess("开启成功");
+        });
+      },
+      /** 提交按钮 */
+      submitForm() {
+        this.$refs["form"].validate(valid => {
+          if (valid) {
+            if (!this.addFlag) {
+              updateFlsqd(this.form).then(response => {
+                this.$modal.msgSuccess("修改成功");
+                this.open = false;
+                this.getList();
+              });
+            } else {
+              addFlsqd(this.form).then(response => {
+                this.$modal.msgSuccess("新增成功");
+                this.open = false;
+                this.getList();
+                this.getNewId();
+              });
+            }
+          }
+        });
+      },
+      /** 删除按钮操作 */
+      handleDelete(row) {
+        const ids = row.id || this.ids;
+        this.$modal.confirm('是否确认删除放疗申请单编号为"' + ids + '"的数据项？').then(function() {
+          return delFlsqd(ids);
+        }).then(() => {
+          this.getList();
+          this.$modal.msgSuccess("删除成功");
+        }).catch(() => {});
+      },
+      /** 导出按钮操作 */
+      handleExport() {
+        this.download('fl/flsqd/export', {
+          ...this.queryParams
+        }, `flsqd_${new Date().getTime()}.xlsx`)
+      },
+      openAlloctDig(row) {
+        this.getPostUser(row.dqlcjdmc)
+        console.log("岗位用户：", this.postUserList);
+        this.allocateDigOpen = true;
+        this.selectedWorker = row.dqczry;
+        this.selectedRow = row;
+      },
+      allocateUser() {
+        // 在这里执行指派任务的逻辑，可以通过this.selectedWorker获取选择的工作人员ID
+        console.log('已选择的工作人员ID：', this.selectedWorker);
+        this.allocateDigOpen = false;
 
-    },
-    //签名
-    handleSign(row) {
-      this.$modal.confirm('确定签名？').then(function () {
-        return signFlsqd(row);
-      }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("签名成功");
-      }).catch(() => { });
-    },
-    //openLCDig
-    openLCDig(row) {
-      this.$refs.lcDetail.openDia(row);
-    },
-
-    openDetailDig(row) {
-      this.$refs.flsqdDetail.openDia(row);
-    },
-    closeDetail() {
-      this.flsqdDetailOpen = false
-      this.flsqdId = null
-      this.flsqdObj = null
-    },
-
-    getNewId() {
-      newId().then(response => {
-        this.newId = response.data;
-      });
-    },
-
-    getUserNameById(userId) {
-      var userName = '';
-      this.userList.forEach(u => {
-        if (u.userId == userId) {
-          userName = u.userName;
+        var selectUser = this.selectedWorker
+        this.selectedWorker = null;
+        var flsqd = {
+          id: this.selectedRow.id,
+          dqczry: selectUser
         }
-      })
-      return userName;
-    },
-    getPostUser(postCode) {
-      listPostUser({"postCode": postCode}).then(response => {
-        this.postUserList = response;
-      });
-    },
 
-  }
-};
+        updateFlsqd(flsqd).then(response => {
+          this.$modal.msgSuccess("指派成功");
+          this.open = false;
+          this.getList();
+        });
+
+      },
+      //签名
+      handleSign(row) {
+        this.$modal.confirm('确定签名？').then(function() {
+          return signFlsqd(row);
+        }).then(() => {
+          this.getList();
+          this.$modal.msgSuccess("签名成功");
+        }).catch(() => {});
+      },
+      //openLCDig
+      openLCDig(row) {
+        this.$refs.lcDetail.openDia(row);
+      },
+
+      openDetailDig(row) {
+        this.$refs.flsqdDetail.openDia(row);
+      },
+      closeDetail() {
+        this.flsqdDetailOpen = false
+        this.flsqdId = null
+        this.flsqdObj = null
+      },
+
+      getNewId() {
+        newId().then(response => {
+          this.newId = response.data;
+        });
+      },
+
+      getUserNameById(userId) {
+        var userName = '';
+        this.userList.forEach(u => {
+          if (u.userId == userId) {
+            userName = u.userName;
+          }
+        })
+        return userName;
+      },
+      getPostUser(postCode) {
+        listPostUser({
+          "postCode": postCode
+        }).then(response => {
+          this.postUserList = response;
+        });
+      },
+
+    }
+  };
 </script>
