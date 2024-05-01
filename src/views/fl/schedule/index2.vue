@@ -29,7 +29,7 @@
       </el-table-column>
       <el-table-column :label="item.name" width="230" v-for="(item, index) in week">
         <template slot-scope="scope">
-          <span>{{ getMTNameById(scope.row.arr[index].machineId , scope.row.arr[index].schTime)  }}</span>
+          <span>{{ getMTNameById(scope.row.arr[index])  }}</span>
         </template>
       </el-table-column>
     </el-table>
@@ -308,9 +308,11 @@ export default {
         this.$modal.msgError("请选择日期");
         return;
       }
-      this.editFlag = true;
+
       this.buildEditTableData();
       this.watchMachineChange();
+      this.editFlag = true;
+      console.log("当前表格数据", this.tableData)
     },
     /** 提交按钮 */
     submitForm() {
@@ -332,14 +334,24 @@ export default {
           if (t.dbr != null && t.dbsj == null) {
             t.dbsj = t.schTime;
           }
+
+          var aaa = this.machineArr.find(e=>e.id ==t.machineId);
+          var
+           machId = t.machineId;
+          if (!aaa) {
+            t.textInput = t.machineId;
+            machId = null;
+          }
           dataList.push({
             id: t.id,
             userId: e.userId,
-            machineId: t.machineId,
+            machineId: machId,
             schTime: t.schTime,
             schDate: this.week[j].date,
             dbr: t.dbr,
-            dbsj: t.dbsj
+            dbsj: t.dbsj,
+            tb: e.tb,
+            textInput: t.textInput
           })
         }
 
@@ -383,6 +395,7 @@ export default {
           this.tableData = [];
         }
 
+      console.log("打印tableData中", this.tableData)
       this.userArr.forEach((item, index) => {
 
         // console.log("this.tableData", this.tableData)
@@ -402,21 +415,31 @@ export default {
             db: '0',
             arr: arr
           })
-        } else if (this.tableData.findIndex(e => e.userId == item.userId) == -1) {
-          var arr = [];
-          for (let i = 0; i < this.week.length; i++) {
-            arr.push({
-              machineId: null,
-              schTime: null,
-            });
+        } else  {
+          var existUser = this.tableData.find(e=>e.userId == item.userId)
+          if (existUser == null) {
+            console.log("技师不在在tableData中", item.userId)
+            //进入这个if就表示有些技师不在返回的数据里，需要填充到tableData中
+            var arr = [];
+            for (let i = 0; i < this.week.length; i++) {
+              arr.push({
+                machineId: null,
+                schTime: null,
+              });
+            }
+
+            this.tableData.push({
+              userId: item.userId,
+              tb: '1',
+              db: '0',
+              arr: arr
+            })
+          } else {
+            console.log("技师已在tableData中", existUser)
+            // existUser.tb = '1';
+            // existUser.db = '0';
           }
 
-          this.tableData.push({
-            userId: item.userId,
-            tb: '1',
-            db: '0',
-            arr: arr
-          })
         }
       });
     },
@@ -448,7 +471,10 @@ export default {
           function (newVal, oldVal) {
             console.log(`第 ${index + 1} 个技师的 机器 发生了变化：`, oldVal, '->', newVal);
             if (item.tb == '1') {
+              item.db = '0';
               item.arr.forEach((e, i) => {
+                e.dbr = null;
+                e.dbsj=null;
                 if (i > 0 && i < 5) {
                   e.machineId = item.arr[0].machineId;
                   e.schTime = item.arr[0].schTime;
@@ -460,8 +486,20 @@ export default {
       });
     },
 
-    getMTNameById(machineId, timeid) {
-      return this.getMachineNameById(machineId) + " " + this.getTimeById(timeid)
+    getMTNameById(obj) {
+      var machineId = obj.machineId;
+      var timeid = obj.schTime;
+      var dbr = obj.dbr;
+      var dbsj = obj.dbsj;
+      if (dbsj == null) {
+        dbsj = timeid;
+      }
+      var machineName = this.getMachineNameById(machineId);
+      var str = machineName + " " + this.getTimeById(timeid);
+      if (dbr != null) {
+        str = str + "(" + this.getUserNameById(dbr) + " " + machineName + " " + this.getTimeById(dbsj) + ")";
+      }
+      return str
     },
 
     getMachineNameById(id) {

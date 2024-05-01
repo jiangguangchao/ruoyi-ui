@@ -6,7 +6,7 @@
       <el-option v-for="item in machineArr" :key="item.id" :label="item.name" :value="item.id">
       </el-option>
     </el-select>
-    <el-select class="select-right" v-model="schTime" placeholder="时间选择" @change="changeTime">
+    <el-select class="select-right" v-model="schTime" :clearable="true" placeholder="时间选择" @change="changeTime">
       <el-option v-for="item in dict.type.zhibansj" :key="item.value" :label="item.label"
         :value="item.value"></el-option>
     </el-select>
@@ -14,7 +14,8 @@
   <div class="select-container" v-show="row.tb == '1' && index > 0 && index < 5">
     <span>{{ getMTNameById(row.arr[index].machineId, row.arr[index].schTime) }}</span>
   </div>
-  <div class="select-container" v-show="!(row.tb == '1' && index > 0 && index < 5) && row.db == '1'">
+  <div class="select-container" v-show="row.db == '1'">
+    {{row.db}}
     <el-select class="select-left" v-model="row.arr[index].dbr" placeholder="代班技师选择">
       <el-option v-for="item in userArr" :key="item.userId" :label="item.userName" :value="item.userId"></el-option>
     </el-select>
@@ -61,12 +62,15 @@ export default {
 
     changeTime(val) {
       this.row.arr[this.index].schTime = val;
+      if (this.row.arr[this.index].dbr != null && this.row.arr[this.index].dbr != undefined) {
+        this.row.arr[this.index].dbsj = val;
+      }
     },
-    
+
     getMTNameById(machineId, timeid) {
       return this.getMachineNameById(machineId) + " " + this.getTimeById(timeid)
     },
-    
+
     getMachineNameById(id) {
       if (id == null || id == undefined) {
         return '';
@@ -77,7 +81,7 @@ export default {
       }
       return m.name;
     },
-    
+
     getTimeById(id) {
       if (id == null || id == undefined) {
         return '';
