@@ -1,6 +1,15 @@
 <template>
   <div>
-    <p>{{getNames}}</p>
+    <p v-for="e in radList" @click="cli(e)">{{e.hzXm}}</p>
+
+    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+      <el-tabs type="border-card">
+        <el-tab-pane label="本次放疗信息">本次放疗信息</el-tab-pane>
+        <el-tab-pane label="疗程信息">疗程信息</el-tab-pane>
+        <el-tab-pane label="放疗单">放疗单</el-tab-pane>
+      </el-tabs>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -14,6 +23,8 @@ export default {
   },
   data() {
     return {
+      title: '患者治疗信息',
+      open: false,
       name:null
     }
   },
@@ -22,21 +33,12 @@ export default {
 
 
   computed: {
-    getNames(){
-      if (this.radList == undefined || this.radList == null || this.radList.length < 1) {
-        return '-';
-      }
-      var name = "";
-      this.radList.forEach(e => {
-        name = name + e.hzXm + ","
-      })
-
-      return name;
-
-    },
   },
   methods: {
-
+    cli(e) {
+      console.log(e)
+      this.open = true;
+    }
 
   }
 };
@@ -44,20 +46,5 @@ export default {
 
 
 <style type="text/css">
-.select-container {
-  display: flex;
-  align-items: center;
-  /* 如果需要垂直居中 */
-}
 
-.select-left,
-.select-right {
-  margin-right: 2px;
-  /* 可选，为了在两个下拉框之间添加一些间距 */
-}
-
-.select-right {
-  margin-right: 0;
-  /* 最后一个下拉框不需要右边距 */
-}
 </style>
