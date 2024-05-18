@@ -25,7 +25,7 @@
 
       <el-table-column :label="item" width="230" v-for="(item, index) in hours">
         <template slot-scope="scope">
-          abc
+          <CellRad :radList="scope.row[item]"></CellRad>
         </template>
       </el-table-column>
       </el-table>
@@ -58,8 +58,12 @@
 <script>
 import { listRadiotherapy, getRadiotherapy, delRadiotherapy, addRadiotherapy, updateRadiotherapy, removeSchTime } from "@/api/fl/radiotherapy";
 import { listMachine } from "@/api/fl/machine";
+import CellRad from "./cellRad.vue"
 export default {
   dicts: ['sys_yes_no', 'fszl_zt'],
+  components: {
+    CellRad
+  },
   data() {
     return {
       // 遮罩层
@@ -94,7 +98,7 @@ export default {
     };
   },
   created() {
-    
+
     this.buildHourArr();
     this.getMachine();
     this.getList();
@@ -107,7 +111,7 @@ export default {
       listRadiotherapy(this.queryParams).then(response => {
         this.tableData = response.rows;
         this.buildTableData(this.tableData);
-        console.log("查询结果", this.tableData)
+        console.log("查询结果", response.rows)
       });
     },
 
@@ -261,7 +265,7 @@ export default {
           ]
         }
       ]
-      this.tableData = obj;
+      this.tableData = objArr;
 
       // const tb;
       // tableData.forEach(e => {
