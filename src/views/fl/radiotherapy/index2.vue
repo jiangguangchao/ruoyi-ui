@@ -1,7 +1,6 @@
 <template>
   <div>
-    <el-table :data="tableData" border style="width: 100%">
-      <!-- <el-table :data="tableData" border style="width: 100%"> -->
+    <!-- <el-table :data="tableData" border style="width: 100%">
       <el-table-column prop="machineName" label="放疗机器"></el-table-column>
       <el-table-column prop="hzXm" label="患者姓名"></el-table-column>
       <el-table-column prop="schTime" label="治疗时间"></el-table-column>
@@ -15,7 +14,21 @@
             v-hasPermi="['fl:radiotherapy:remove']">删除</el-button>
         </template>
       </el-table-column>
-    </el-table>
+    </el-table> -->
+
+    <el-table :data="tableData" style="width: 100%" border>
+      <el-table-column label="机器名称" width="130">
+        <template slot-scope="scope">
+          <span>{{ getMachineNameById(scope.row.machineId) }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column :label="item" width="230" v-for="(item, index) in hours">
+        <template slot-scope="scope">
+          abc
+        </template>
+      </el-table-column>
+      </el-table>
 
     <!-- 添加或修改放射治疗对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
@@ -44,6 +57,7 @@
 
 <script>
 import { listRadiotherapy, getRadiotherapy, delRadiotherapy, addRadiotherapy, updateRadiotherapy, removeSchTime } from "@/api/fl/radiotherapy";
+import { listMachine } from "@/api/fl/machine";
 export default {
   dicts: ['sys_yes_no', 'fszl_zt'],
   data() {
@@ -67,6 +81,8 @@ export default {
         cureFlag: null,
         cureStatus: null,
       },
+      hours:['7'],
+      machineArr:[],
       tableData: [
         // { machine: '机器A', name: '张三', time: '2024-04-07' },
         // { machine: '机器A', name: '李四', time: '2024-04-08' },
@@ -78,7 +94,11 @@ export default {
     };
   },
   created() {
+    
+    this.buildHourArr();
+    this.getMachine();
     this.getList();
+    // this.buildTableData();
   },
   methods: {
     /** 查询放射治疗列表 */
@@ -86,6 +106,7 @@ export default {
       this.loading = true;
       listRadiotherapy(this.queryParams).then(response => {
         this.tableData = response.rows;
+        this.buildTableData(this.tableData);
         console.log("查询结果", this.tableData)
       });
     },
@@ -159,6 +180,105 @@ export default {
 
     },
 
+    getMachine() {
+      listMachine({ pageNum: 1, pageSize: 100, }).then(response => {
+        this.machineArr = response.rows
+      });
+    },
+
+    buildHourArr() {
+      var startTime = 7;
+      var endTime = 19;
+      this.hours = Array.from({ length: endTime - startTime +1 }, (_, i) => i + startTime + "");
+    },
+
+    buildTableData(tableData){
+      if (tableData == undefined || tableData == null || tableData.length < 1) {
+        return;
+      }
+
+
+
+      // 假设有以下学生对象数组
+      const students = [
+        { name: 'Alice', class: '1A' },
+        { name: 'Bob', class: '1B' },
+        { name: 'Charlie', class: '1A' },
+        { name: 'David', class: '1C' },
+        { name: 'Eve', class: '1B' }
+      ];
+
+
+      // 使用reduce方法进行分组
+      const groupedByClass = students.reduce((groups, student) => {
+        // 如果该班级的数组不存在，则创建一个新的数组
+        if (!groups[student.class]) {
+          groups[student.class] = [];
+        }
+        // 将学生对象添加到对应的班级数组中
+        groups[student.class].push(student);
+        return groups;
+      }, {});
+
+      console.log(groupedByClass);
+
+
+      var objArr = [];
+      this.machineArr.forEach(m => {
+        var obj = {machineId: m.id}
+        objArr.push(obj)
+        this.hours.forEach(h => {
+          obj[h] = [];
+        })
+      })
+
+
+
+
+      tableData.forEach(e => {
+        let obj = objArr.find(o => o.machineId == e.machineId);
+        let hour = e.schTime.slice(11, 13).startsWith('0') ? e.schTime.slice(12, 13) : e.schTime.slice(11, 13)
+        console.log("当前时间", hour)
+        obj[hour].push(e)
+      })
+
+      console.log("objArr", objArr)
+
+
+      // tableData.reduce((groups, e) => {
+      //   if (!groups[e.machineId]) {
+      //     groups[e.machineId + ""] = []
+      //   }
+      //   groups[e.machineId + ""].push(e);
+      // }, {})
+
+      var obj = [
+        {
+          machineId:1,
+          '7': [
+            {name:'n1'},
+            {name:'n2'}
+          ]
+        }
+      ]
+      this.tableData = obj;
+
+      // const tb;
+      // tableData.forEach(e => {
+
+      //   var obj = {machineId:e.machineId}
+
+      //   this.hours.forEach(h => {
+
+
+
+
+      //   })
+
+      // })
+
+    },
+
     machineCount() {
       //统计tableData中各种machine的数量以及第一次出现的index,将统计数据存入map中，其中map的key为index
       let machineCount = {};
@@ -183,6 +303,19 @@ export default {
 
       return countMap;
     },
+
+
+    getMachineNameById(id) {
+      if (id == null || id == undefined) {
+        return '';
+      }
+      var m = this.machineArr.find(e => e.id == id)
+      if (m == null) {
+        return id;
+      }
+      return m.name;
+    },
+
   }
 };
 </script>
