@@ -443,7 +443,7 @@
   export default {
     name: "Flsqd",
     dicts: ['fl_zljq', 'fl_fldzt', 'fl_zljs', 'fl_gdfs', 'fl_txrhlx', 'fl_igrtpllx', 'sys_yes_no', 'sys_user_sex',
-      'fl_smlx1', 'fl_IGRT', 'fl_smlx2', 'fl_lc'
+      'fl_smlx1', 'fl_IGRT', 'fl_smlx2', 'fl_lc', 'fl_cureStatus'
     ],
     data() {
       return {
