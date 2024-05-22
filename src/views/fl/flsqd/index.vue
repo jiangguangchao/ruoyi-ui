@@ -14,48 +14,11 @@
           <el-option v-for="dict in dict.type.sys_user_sex" :key="dict.value" :label="dict.label" :value="dict.value" />
         </el-select>
       </el-form-item>
-      <el-form-item label="患者放疗医生" prop="hzFlys">
-        <el-input v-model="queryParams.hzFlys" placeholder="请输入患者放疗医生" clearable size="small"
-          @keyup.enter.native="handleQuery" />
-      </el-form-item>
-      <el-form-item label="固定方式" prop="gdfs">
-        <el-select v-model="queryParams.gdfs" placeholder="请选择固定方式" clearable size="small">
-          <el-option v-for="dict in dict.type.fl_gdfs" :key="dict.value" :label="dict.label" :value="dict.value" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="图像融合类型" prop="txrhlx">
-        <el-select v-model="queryParams.txrhlx" placeholder="请选择图像融合类型" clearable size="small">
-          <el-option v-for="dict in dict.type.fl_txrhlx" :key="dict.value" :label="dict.label" :value="dict.value" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="治疗技术" prop="zljs">
-        <el-select v-model="queryParams.zljs" placeholder="请选择治疗技术" clearable size="small">
-          <el-option v-for="dict in dict.type.fl_zljs" :key="dict.value" :label="dict.label" :value="dict.value" />
-        </el-select>
-      </el-form-item>
+
       <el-form-item label="治疗机器" prop="zljq">
         <el-select v-model="queryParams.zljq" placeholder="请选择治疗机器" clearable size="small">
           <el-option v-for="dict in dict.type.fl_zljq" :key="dict.value" :label="dict.label" :value="dict.value" />
         </el-select>
-      </el-form-item>
-      <el-form-item label="IGRT" prop="igrt">
-        <el-select v-model="queryParams.igrt" placeholder="请选择IGRT" clearable size="small">
-          <el-option v-for="dict in dict.type.fl_IGRT" :key="dict.value" :label="dict.label" :value="dict.value" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="是否剂量验证" prop="jlyz">
-        <el-select v-model="queryParams.jlyz" placeholder="请选择是否剂量验证" clearable size="small">
-          <el-option v-for="dict in dict.type.sys_yes_no" :key="dict.value" :label="dict.label" :value="dict.value" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="当前流程节点" prop="dqlcjdmc">
-        <el-select v-model="queryParams.dqlcjdmc" placeholder="请选择当前流程节点" clearable size="small">
-          <el-option v-for="dict in dict.type.fl_lc" :key="dict.value" :label="dict.label" :value="dict.value" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="当前所属操作人员" prop="dqczry">
-        <el-input v-model="queryParams.dqczry" placeholder="请输入当前所属操作人员" clearable size="small"
-          @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item label="放疗单状态" prop="fldzt">
         <el-select v-model="queryParams.fldzt" placeholder="请选择放疗单状态" clearable size="small">
@@ -100,6 +63,11 @@
       <el-table-column label="患者出生年月" align="center" prop="hzSr" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.hzSr, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="疗程状态" align="center" prop="cureStatus">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.fl_cureStatus" :value="scope.row.cureStatus" />
         </template>
       </el-table-column>
       <el-table-column label="已支付/已治疗/总治疗次数" align="center" prop="hzXm">
