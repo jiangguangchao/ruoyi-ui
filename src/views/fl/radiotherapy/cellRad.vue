@@ -1,12 +1,23 @@
 <template>
   <div id="tableCell">
     <p v-for="e in radList" @click="cli(e)" style="text-align: center;">
-      <el-link :underline="false">{{e.hzXm}}</el-link>
+      <el-link :underline="false">{{ e.hzXm }}</el-link>
     </p>
-    <p @click="add" style="text-align: center;">
+    <!-- <p @click="add" style="text-align: center;">
       <i class="el-icon-circle-plus"></i>
-    </p>
-    
+    </p> -->
+    <el-popover placement="right" width="600" trigger="click" @show="getFlds">
+      <el-table :data="flds">
+        <el-table-column  property="id" label="放疗单"></el-table-column>
+        <el-table-column  property="hzXm" label="患者姓名"></el-table-column>
+        <el-table-column  property="hzXb" label="患者性别"></el-table-column>
+        <el-table-column  property="cureCount" label="总放疗次数"></el-table-column>
+      </el-table>
+      <p style="text-align: center;" slot="reference">
+        <i class="el-icon-circle-plus"></i>
+      </p>
+    </el-popover>
+
     <el-dialog :title="infoTitle" :visible.sync="infoOpen" width="500px" append-to-body>
       <el-tabs type="border-card">
         <el-tab-pane label="本次放疗信息">本次放疗信息</el-tab-pane>
@@ -16,19 +27,23 @@
     </el-dialog>
 
     <el-dialog :title="addTitle" :visible.sync="addOpen" width="500px" append-to-body>
-      
+
     </el-dialog>
+
+
 
   </div>
 </template>
 
 
 <script>
-
+import { getFlds } from "@/api/fl/radiotherapy";
 export default {
+
   dicts: ['zhibansj'],
   props: {
     radList: Array,
+    machineId: Number,
   },
   data() {
     return {
@@ -36,7 +51,7 @@ export default {
       infoOpen: false,
       addTitle: '新增患者治疗信息',
       addOpen: false,
-      name:null
+      flds: [],
     }
   },
   created() {
@@ -55,12 +70,29 @@ export default {
       this.addOpen = true;
     },
 
+    //查询治疗状态为“未开始”的放疗单
+    getFlds() {
+      var query = {
+        cureStatus: 'wks',
+        machineId: this.machineId
+      }
+      console.log("查询条件",query)
+      getFlds(query).then(response => {
+        this.flds = response.data
+        console.log("查询结果",response.data)
+      });
+    },
+
+    show() {
+      console.log("show");
+      // this.getFlds();
+      // this.getFlds();
+    }
+
 
   }
 };
 </script>
 
 
-<style type="text/css">
-
-</style>
+<style type="text/css"></style>

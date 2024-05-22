@@ -9,7 +9,7 @@
 
       <el-table-column :label="item" v-for="(item, index) in hours">
         <template slot-scope="scope">
-          <CellRad :radList="scope.row[item]"></CellRad>
+          <CellRad :radList="scope.row[item]" :machineId="scope.row.machineId"></CellRad>
         </template>
       </el-table-column>
     </el-table>

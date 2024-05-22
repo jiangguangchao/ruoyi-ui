@@ -17,6 +17,15 @@ export function getRadiotherapy(id) {
   })
 }
 
+// 查询放疗单
+export function getFlds(query) {
+  return request({
+    url: '/fl/radiotherapy/fld',
+    method: 'get',
+    params: query
+  })
+}
+
 // 新增放射治疗
 export function addRadiotherapy(data) {
   return request({
