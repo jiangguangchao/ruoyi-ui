@@ -1,13 +1,22 @@
 <template>
-  <div>
-    <p v-for="e in radList" @click="cli(e)">{{e.hzXm}}</p>
-
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+  <div id="tableCell">
+    <p v-for="e in radList" @click="cli(e)" style="text-align: center;">
+      <el-link :underline="false">{{e.hzXm}}</el-link>
+    </p>
+    <p @click="add" style="text-align: center;">
+      <i class="el-icon-circle-plus"></i>
+    </p>
+    
+    <el-dialog :title="infoTitle" :visible.sync="infoOpen" width="500px" append-to-body>
       <el-tabs type="border-card">
         <el-tab-pane label="本次放疗信息">本次放疗信息</el-tab-pane>
         <el-tab-pane label="疗程信息">疗程信息</el-tab-pane>
         <el-tab-pane label="放疗单">放疗单</el-tab-pane>
       </el-tabs>
+    </el-dialog>
+
+    <el-dialog :title="addTitle" :visible.sync="addOpen" width="500px" append-to-body>
+      
     </el-dialog>
 
   </div>
@@ -23,8 +32,10 @@ export default {
   },
   data() {
     return {
-      title: '患者治疗信息',
-      open: false,
+      infoTitle: '患者治疗信息',
+      infoOpen: false,
+      addTitle: '新增患者治疗信息',
+      addOpen: false,
       name:null
     }
   },
@@ -37,8 +48,13 @@ export default {
   methods: {
     cli(e) {
       console.log(e)
-      this.open = true;
-    }
+      this.infoOpen = true;
+    },
+
+    add() {
+      this.addOpen = true;
+    },
+
 
   }
 };
