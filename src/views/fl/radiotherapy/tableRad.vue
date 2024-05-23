@@ -9,7 +9,9 @@
 
       <el-table-column :label="item" v-for="(item, index) in hours">
         <template slot-scope="scope">
-          <CellRad :radList="scope.row[item]" :machineId="scope.row.machineId"></CellRad>
+          <CellRad :radList="scope.row[item]" :machineId="scope.row.machineId" :dictType="dictType"
+            :schTime="schDate + ' ' + item + ':00:00' " @addRad="getList">
+          </CellRad>
         </template>
       </el-table-column>
     </el-table>
@@ -22,7 +24,6 @@ import { listRadiotherapy, getRadiotherapy, delRadiotherapy, addRadiotherapy, up
 import { listMachine } from "@/api/fl/machine";
 import CellRad from "./cellRad.vue"
 export default {
-  dicts: ['sys_yes_no', 'fszl_zt'],
   components: {
     CellRad
   },
@@ -30,6 +31,7 @@ export default {
     schDate: String,
     machineArr: Array,
     hours: Array,
+    dictType: Object,
   },
   data() {
     return {
@@ -61,7 +63,7 @@ export default {
     };
   },
   created() {
-
+    console.log("dictType--", this.dictType)
 
     this.getList();
     // this.buildTableData();
@@ -73,8 +75,8 @@ export default {
       this.queryParams.params["beginTime"] = this.schDate + " 00:00:00";
       this.queryParams.params["endTime"] = this.schDate + " 23:59:59";
       listRadiotherapy(this.queryParams).then(response => {
-        this.tableData = response.rows;
-        this.buildTableData(this.tableData);
+        // this.tableData = response.rows;
+        this.buildTableData(response.rows);
         console.log("查询结果", response.rows)
       });
     },
@@ -85,9 +87,7 @@ export default {
     },
 
     buildTableData(tableData) {
-      if (tableData == undefined || tableData == null || tableData.length < 1) {
-        return;
-      }
+
 
       var objArr = [];
       this.machineArr.forEach(m => {
@@ -98,13 +98,16 @@ export default {
         })
       })
 
-      tableData.forEach(e => {
-        let obj = objArr.find(o => o.machineId == e.machineId);
-        let hour = e.schTime.slice(11, 13).startsWith('0') ? e.schTime.slice(12, 13) : e.schTime.slice(11, 13)
-        obj[hour].push(e)
-      })
+      if ( tableData != null && tableData.length > 0) {
+        tableData.forEach(e => {
+          let obj = objArr.find(o => o.machineId == e.machineId);
+          let hour = e.schTime.slice(11, 13).startsWith('0') ? e.schTime.slice(12, 13) : e.schTime.slice(11, 13)
+          obj[hour].push(e)
+        })
+      }
 
       this.tableData = objArr;
+      console.log("构建后的tableData", this.tableData)
     },
 
     getMachineNameById(id) {

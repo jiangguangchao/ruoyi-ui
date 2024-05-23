@@ -14,8 +14,8 @@
     </el-form>
 
     <el-tabs type="border-card" @tab-click="clickTab">
-      <el-tab-pane v-for="(w, index) in week" :label="w.name">
-        <TableRad :ref="'tab' + index" :schDate="w.date" :machineArr="machineArr" :hours="hours"></TableRad>
+      <el-tab-pane v-for="(w, index) in week" :label="w.name" lazy>
+        <TableRad :ref="'tab' + index" :schDate="w.date" :machineArr="machineArr" :hours="hours" :dictType="dict.type"></TableRad>
       </el-tab-pane>
     </el-tabs>
 
@@ -26,7 +26,7 @@
 import { listMachine } from "@/api/fl/machine";
 import TableRad from "./tableRad.vue"
 export default {
-  dicts: ['sys_yes_no', 'fszl_zt'],
+  dicts: ['sys_yes_no', 'fszl_zt', 'sys_user_sex', 'fl_cureStatus'],
   components: {
     TableRad
   },
@@ -79,7 +79,9 @@ export default {
     },
 
     clickTab(tab, event){
-      this.$refs["tab" + tab.index][0].getList();
+      if (this.$refs["tab" + tab.index] && this.$refs["tab" + tab.index][0]) {
+        this.$refs["tab" + tab.index][0].getList();
+      }
     },
 
     buildWeekArr() {
