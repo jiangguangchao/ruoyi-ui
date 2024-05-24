@@ -44,6 +44,15 @@ export function updateRadiotherapy(data) {
   })
 }
 
+// 修改放射治疗
+export function updateSchTime(data) {
+  return request({
+    url: '/fl/radiotherapy/updateSchTime',
+    method: 'put',
+    data: data
+  })
+}
+
 // 移除时间安排
 export function removeSchTime(data) {
   return request({

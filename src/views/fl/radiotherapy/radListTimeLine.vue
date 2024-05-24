@@ -1,15 +1,18 @@
 <template>
   <div>
+    <el-button @click="showRad">展开</el-button>
+    <el-button @click="hideRad">合并</el-button>
     <el-timeline>
-      <el-timeline-item v-for="(r, index) in radList" timestamp="r.schTime + ' 第' + index + '次'" placement="top" >
+      <el-timeline-item v-for="(r, index) in radList" :timestamp="r.timestamp" placement="top"
+        :color="r.color">
         <!-- <el-card>
           <h4>更新 Github 模板</h4>
           <p>王小虎 提交于 2018/4/12 20:46</p>
         </el-card> -->
-        <el-card>
+        <el-card v-show="showFlag">
           <RadDetail :rad="r" :dictType="dictType"></RadDetail>
         </el-card>
-        
+
       </el-timeline-item>
     </el-timeline>
   </div>
@@ -44,10 +47,10 @@
         flds: [],
         selectFlds: [],
         radList: [],
+        showFlag: false,
       }
     },
     created() {
-      console.log("这里是radListTimeLine主键-----------------")
       this.getList()
     },
     computed: {},
@@ -60,8 +63,24 @@
             fldId: this.rad.fldId
           }
           listRadiotherapy(queryParams).then(response => {
-            this.radList = response.rows;
+
+            if (response.rows.length > 0) {
+              response.rows.forEach((e, index) => {
+                if (e.cureStatus == '5') {
+                  e.color='#0bbd87';
+                } else if (e.cureStatus == '1') {
+                  e.color = '#ef9e1b';
+                }
+
+                e.timestamp = e.schTime + ' 第' + (index + 1) + '次';
+                if (e.id == this.rad.id) {
+                  e.timestamp = e.timestamp + '（当前治疗）'
+                }
+
+              })
+            }
             console.log("查询疗程列表结果", response.rows)
+            this.radList = response.rows;
           });
         } else {
           console.log("放疗单编号为空，无法查询")
@@ -69,11 +88,26 @@
 
       },
 
-      // clickRad(e) {
-      //   console.log(e)
-      //   this.rad = e;
-      //   this.infoOpen = true;
-      // },
+      getShowFlag(){
+        return false;
+      },
+
+      showRad() {
+        this.showFlag = true;
+      },
+
+      hideRad() {
+        this.showFlag = false;
+      },
+
+      getColor() {
+        return '#0bbd87';
+      },
+
+      clickRad(r) {
+        console.log("点击-----------------")
+        // this.showFlagMap.set(r.id, !this.showFlagMap.get(r.id))
+      },
 
       // showAddDialog() {
       //   this.getFlds();
