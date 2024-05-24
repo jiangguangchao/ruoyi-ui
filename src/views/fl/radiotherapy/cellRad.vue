@@ -1,6 +1,6 @@
 <template>
   <div id="tableCell">
-    <p v-for="e in radList" @click="cli(e)" style="text-align: center;">
+    <p v-for="e in radList" @click="clickRad(e)" style="text-align: center;">
       <el-link :underline="false">{{ e.hzXm }}</el-link>
     </p>
     <p @click="showAddDialog" style="text-align: center;">
@@ -41,11 +41,15 @@
       </p>
     </el-popover> -->
 
-    <el-dialog :title="infoTitle" :visible.sync="infoOpen" width="500px" append-to-body>
-      <el-tabs type="border-card">
-        <el-tab-pane label="本次放疗信息">本次放疗信息</el-tab-pane>
-        <el-tab-pane label="疗程信息">疗程信息</el-tab-pane>
-        <el-tab-pane label="放疗单">放疗单</el-tab-pane>
+    <el-dialog :title="infoTitle" :visible.sync="infoOpen" width="800px" append-to-body>
+      <el-tabs type="border-card" >
+        <el-tab-pane label="本次放疗信息" lazy>
+          <RadDetail :rad="rad" :dictType="dictType"></RadDetail>
+        </el-tab-pane>
+        <el-tab-pane label="疗程信息" lazy>
+          <RadListTimeLine :rad="rad" :dictType="dictType"></RadListTimeLine>
+        </el-tab-pane>
+        <el-tab-pane label="放疗单" lazy>放疗单</el-tab-pane>
       </el-tabs>
     </el-dialog>
 
@@ -92,6 +96,8 @@
     getFlds,
     addRadiotherapy
   } from "@/api/fl/radiotherapy";
+  import RadDetail from './radDetail.vue'
+  import RadListTimeLine from './radListTimeLine.vue'
   export default {
 
     props: {
@@ -101,6 +107,10 @@
       schTime: String,
 
     },
+    components: {
+      RadDetail,
+      RadListTimeLine
+    },
     data() {
       return {
         infoTitle: '患者治疗信息',
@@ -109,13 +119,15 @@
         addOpen: false,
         flds: [],
         selectFlds: [],
+        rad: null,
       }
     },
     created() {},
     computed: {},
     methods: {
-      cli(e) {
+      clickRad(e) {
         console.log(e)
+        this.rad =e;
         this.infoOpen = true;
       },
 
