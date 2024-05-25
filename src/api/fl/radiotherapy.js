@@ -53,6 +53,15 @@ export function updateSchTime(data) {
   })
 }
 
+// 结束本次放射治疗
+export function endCure(data) {
+  return request({
+    url: '/fl/radiotherapy/endCure',
+    method: 'put',
+    data: data
+  })
+}
+
 // 移除时间安排
 export function removeSchTime(data) {
   return request({
