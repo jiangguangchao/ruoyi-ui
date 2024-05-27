@@ -10,7 +10,7 @@
       <el-table-column :label="item" v-for="(item, index) in hours">
         <template slot-scope="scope">
           <CellRad :radList="scope.row[item]" :machineId="scope.row.machineId" :dictType="dictType"
-            :schTime="schDate + ' ' + item + ':00:00' " @addRad="getList">
+            :schTime="schDate + ' ' + item + ':00:00' " :getMachineNameById="getMachineNameById" @addRad="getList">
           </CellRad>
         </template>
       </el-table-column>

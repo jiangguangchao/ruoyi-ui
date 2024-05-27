@@ -3,7 +3,7 @@
     <el-descriptions :column="2" border>
       <el-descriptions-item label="ID">{{ radCopy.id }}</el-descriptions-item>
       <el-descriptions-item label="放疗单编号">{{ radCopy.fldId }}</el-descriptions-item>
-      <el-descriptions-item label="机器编号">{{ radCopy.machineId }}</el-descriptions-item>
+      <el-descriptions-item label="放疗机器">{{ getMachineNameById(radCopy.machineId) }}</el-descriptions-item>
       <!-- <el-descriptions-item label="是否已安排治疗时间">
         {{ getSysYesNoLabel(radCopy.schFlag) }}
       </el-descriptions-item> -->
@@ -24,10 +24,11 @@
     </el-descriptions>
     <div slot="footer" class="dialog-footer" v-if="radCopy.cureStatus == '0' && showEdit">
       <el-button type="primary" @click="openUpdateSchTimeDia">修改治疗时间</el-button>
-      <el-button type="primary" @click="openEndCureDia">治疗结束</el-button>
+      <el-button type="primary" @click="openEndCureDia" v-if="mytest">治疗结束</el-button>
     </div>
     <el-dialog :visible.sync="updateTimeOpen" append-to-body width="600">
-      <el-date-picker v-model="newSchTime" format="yyyy-MM-dd HH:00:00" type="datetime" placeholder="选择日期时间">
+      <el-date-picker v-model="newSchTime" format="yyyy-MM-dd HH:00:00" type="datetime" 
+          @change="timeChange" placeholder="选择日期时间">
       </el-date-picker>
       <div slot="footer" class="dialog-footer">
         <el-checkbox v-model="updateAll">将当前时间应用到所有治疗</el-checkbox>
@@ -47,6 +48,7 @@
 <script>
   import {
     getRadiotherapy,
+    listRadiotherapy,
     updateSchTime,
     endCure
   } from "@/api/fl/radiotherapy";
@@ -57,7 +59,8 @@
     props: {
       dictType: Object,
       rad: Object,
-      showEdit: Boolean
+      showEdit: Boolean,
+      getMachineNameById: Function,
 
     },
     data() {
@@ -67,7 +70,8 @@
         updateAll: true,
         endCureOpen: false,
         workUserArr: [],
-        newSchTime: null
+        newSchTime: null,
+        radList:[],
       };
     },
     filters: {
@@ -83,7 +87,13 @@
     created() {
       this.radCopy = {...this.rad};
     },
+    computed: {
+      
+    },
     methods: {
+      mytest(){
+        console.log("是否执行了mytest")
+      },
       getSysYesNoLabel(e) {
         return this.selectDictLabel(this.dictType.sys_yes_no, e);
       },
@@ -95,15 +105,41 @@
         })
       },
 
+      //查询放疗单下的所有治疗，以便修改日期时判定同一天是否有多次治疗
+      getRadListByFldId(){
+        var para = {
+          fldId: this.radCopy.fldId
+        }
+        listRadiotherapy(para).then(res => {
+          this.radList = res.rows
+        })
+      },
+
+      timeChange(){
+        let date = this.newSchTime;
+        var newSchTimeStr = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+
+        //判断this.newSchTime是否和this.radList数组中每个对象的schTime是否为同一天
+        const exist = this.radList.find(e => e.schTime.substring(0, 10) === newSchTimeStr.substring(0, 10))
+        if (exist) {
+          this.$modal.msgError("同一天[" + newSchTimeStr.substring(0, 10) + "]不能有两次治疗")
+          this.newSchTime = this.radCopy.schTime
+        } 
+
+      },
+
+
+
       openUpdateSchTimeDia() {
         this.newSchTime = this.radCopy.schTime
+        this.getRadListByFldId();
         this.updateTimeOpen = true;
       },
       updateSchTime(){
         var obj = {
           id: this.radCopy.id,
           fldId: this.radCopy.fldId,
-          schTime: this.newSchTime,
+          schTime: this.newSchTime.getTime() + '',
           updateAll: this.updateAll ? '1' : '0'
         }
         updateSchTime(obj).then(res => {
@@ -117,6 +153,11 @@
 
         })
       },
+
+      canEndCure(){
+        
+      },
+      
 
       //查询当前时间机器技师
       getJS(){
@@ -155,6 +196,18 @@
 
       },
       openEndCureDia(){
+        console.log("开始结束治疗")
+
+        const schDate = this.radCopy.schTime.substring(0, 10)
+        let date = new Date()
+        var today = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        console.log("schDate today", schDate, today)
+        if (schDate > today) {
+          
+          this.$modal.msgWarning("只能结束今天或今天之前的治疗")
+          return;
+        }
+
         this.getJS().then(workUserArr => {
           if (workUserArr && workUserArr.length > 0) {
             console.log("查询到有效技师", workUserArr)

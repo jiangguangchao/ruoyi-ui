@@ -2,7 +2,7 @@
   <div id="tableCell">
     <p v-for="e in radList" @click="clickRad(e)" style="text-align: center;">
       <!-- <el-link :underline="false">{{ e.hzXm }}</el-link> -->
-      <el-tag :type="getTagType(e)" effect="dark">{{e.hzXm}}</el-tag>
+      <el-tag :type="getTagType(e)" effect="dark">{{e.hzXm }}</el-tag>
     </p>
     <p @click="showAddDialog" style="text-align: center;">
       <i class="el-icon-circle-plus"></i>
@@ -45,10 +45,11 @@
     <el-dialog :title="infoTitle" :visible.sync="infoOpen" width="800px" append-to-body>
       <el-tabs type="border-card" >
         <el-tab-pane label="本次放疗信息" lazy>
-          <RadDetail :rad="rad" :dictType="dictType" :showEdit="true"></RadDetail>
+          <RadDetail :rad="rad" :dictType="dictType" :showEdit="true" :getMachineNameById="getMachineNameById">
+          </RadDetail>
         </el-tab-pane>
         <el-tab-pane label="疗程信息" lazy>
-          <RadListTimeLine :rad="rad" :dictType="dictType"></RadListTimeLine>
+          <RadListTimeLine :rad="rad" :dictType="dictType" :getMachineNameById="getMachineNameById"></RadListTimeLine>
         </el-tab-pane>
         <el-tab-pane label="放疗单" lazy>放疗单</el-tab-pane>
       </el-tabs>
@@ -106,6 +107,7 @@
       machineId: Number,
       dictType: Object,
       schTime: String,
+      getMachineNameById: Function,
 
     },
     components: {

@@ -10,7 +10,7 @@
           <p>王小虎 提交于 2018/4/12 20:46</p>
         </el-card> -->
         <el-card v-show="showFlag">
-          <RadDetail :rad="r" :dictType="dictType"></RadDetail>
+          <RadDetail :rad="r" :dictType="dictType" :getMachineNameById="getMachineNameById"></RadDetail>
         </el-card>
 
       </el-timeline-item>
@@ -32,7 +32,8 @@
       machineId: Number,
       dictType: Object,
       schTime: String,
-      rad: Object
+      rad: Object,
+      getMachineNameById: Function,
 
     },
     components: {

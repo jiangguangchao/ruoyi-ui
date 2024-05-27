@@ -5,7 +5,7 @@
         <el-input v-model="queryParams.userId" placeholder="请输入用户id" clearable size="small" />
       </el-form-item> -->
       <el-form-item label="日期">
-        <el-date-picker v-model="selectWeek" type="week" format="第WW周 MMdd" placeholder="选择周" @change="weekChange">
+        <el-date-picker v-model="selectDate" type="date" placeholder="选择日期" @change="dateChange">
         </el-date-picker>
       </el-form-item>
       <el-form-item>
@@ -13,8 +13,8 @@
       </el-form-item>
     </el-form>
 
-    <el-tabs type="border-card" @tab-click="clickTab">
-      <el-tab-pane v-for="(w, index) in week" :label="w.name" lazy>
+    <el-tabs type="border-card" v-model="activeName" @tab-click="clickTab" v-if="refushTabs">
+      <el-tab-pane v-for="(w, index) in week" :label="w.name" :name="w.name">
         <TableRad :ref="'tab' + index" :schDate="w.date" :machineArr="machineArr" :hours="hours" :dictType="dict.type"></TableRad>
       </el-tab-pane>
     </el-tabs>
@@ -41,6 +41,8 @@ export default {
       // 表单参数
       form: {},
       showSearch: true,
+      activeName: null,
+      refushTabs:true,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -53,7 +55,7 @@ export default {
       },
       hours: ['7'],
       machineArr: [],
-      selectWeek: null,
+      selectDate: null,
       week: [],
       tableData: [
       ]
@@ -67,15 +69,26 @@ export default {
   },
   methods: {
 
-    weekChange() {
-      this.buildWeekArr();
+    dateChange() {
+      const dateStr = this.selectDate.getFullYear() + "-" + (this.selectDate.getMonth() + 1) + "-" + this.selectDate.getDate();
+      if (this.week.find(e => e.name.includes(dateStr))) {
+      } else {
+        this.buildWeekArr();
+      }
 
-      // if (this.selectWeek.getTime() < this.getMonday().getTime()) {
-      //   this.showEditBut = false;
-      // } else {
-      //   this.showEditBut = true;
+      const weekDay = this.week.find(e => e.name.includes(dateStr))
+      this.activeName = weekDay.name;
+      const weekDayIndex = weekDay.id - 1;
+
+      console.log("关闭")
+      this.refushTabs = false;
+      console.log("打开")
+      this.refushTabs = true;
+      //不会自动刷新，使用这种方式刷新
+      // if (this.$refs["tab" + weekDayIndex] && this.$refs["tab" + weekDayIndex][0]) {
+      //   this.$refs["tab" + weekDayIndex][0].getList();
       // }
-
+     
     },
 
     clickTab(tab, event){
@@ -86,12 +99,14 @@ export default {
 
     buildWeekArr() {
       this.resetWeekArr();
-      if (this.selectWeek == null) {
-        this.selectWeek = this.getThisWeekFirstDay();
+      if (this.selectDate == null) {
+        this.selectDate = new Date();
       }
-      console.log("周", this.selectWeek)
+      const weekFirstDay = this.getWeekFirstDay(this.selectDate);
+      
+      console.log("选择的日期 和周一", this.selectDate, weekFirstDay)
       for (let i = 0; i < this.week.length; i++) {
-        let date = new Date(this.selectWeek.getTime() + 24 * 60 * 60 * 1000 * i);
+        let date = new Date(weekFirstDay.getTime() + 24 * 60 * 60 * 1000 * i);
         //date转字符串
         date = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
         this.week[i].date = date;
@@ -99,17 +114,15 @@ export default {
       }
     },
 
-    getThisWeekFirstDay() {
-      const now = new Date();
-      const dayOfWeek = now.getDay(); // 获取今天是一周中的第几天，0表示周日，1表示周一，以此类推
-
-      // 如果今天是周一，则本周的第一天就是今天
+    getWeekFirstDay(date) {
+      const dayOfWeek = date.getDay();
+      // 如果date是周一，则本周的第一天就是今天
       if (dayOfWeek === 1) {
-        return now;
+        return date;
       } else {
         // 如果不是周一，我们需要回溯到本周的周一
-        let firstDay = new Date(now);
-        firstDay.setDate(now.getDate() - dayOfWeek + 1); // 回溯到周一
+        let firstDay = new Date(date);
+        firstDay.setDate(date.getDate() - dayOfWeek + 1); // 回溯到周一
         return firstDay;
       }
     },
