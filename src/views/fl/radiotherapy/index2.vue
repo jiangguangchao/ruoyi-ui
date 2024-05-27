@@ -14,8 +14,8 @@
     </el-form>
 
     <el-tabs type="border-card" v-model="activeName" @tab-click="clickTab" v-if="refushTabs">
-      <el-tab-pane v-for="(w, index) in week" :label="w.name" :name="w.name">
-        <TableRad :ref="'tab' + index" :schDate="w.date" :machineArr="machineArr" :hours="hours" :dictType="dict.type"></TableRad>
+      <el-tab-pane v-for="(w, index) in week" :label="w.name" :name="w.date" lazy>
+        <TableRad :schDate="w.date" :machineArr="machineArr" :hours="hours" :dictType="dict.type"></TableRad>
       </el-tab-pane>
     </el-tabs>
 
@@ -72,29 +72,16 @@ export default {
     dateChange() {
       const dateStr = this.selectDate.getFullYear() + "-" + (this.selectDate.getMonth() + 1) + "-" + this.selectDate.getDate();
       if (this.week.find(e => e.name.includes(dateStr))) {
+        this.activeName = dateStr;
       } else {
         this.buildWeekArr();
       }
-
-      const weekDay = this.week.find(e => e.name.includes(dateStr))
-      this.activeName = weekDay.name;
-      const weekDayIndex = weekDay.id - 1;
-
-      console.log("关闭")
-      this.refushTabs = false;
-      console.log("打开")
-      this.refushTabs = true;
-      //不会自动刷新，使用这种方式刷新
-      // if (this.$refs["tab" + weekDayIndex] && this.$refs["tab" + weekDayIndex][0]) {
-      //   this.$refs["tab" + weekDayIndex][0].getList();
-      // }
-     
     },
 
     clickTab(tab, event){
-      if (this.$refs["tab" + tab.index] && this.$refs["tab" + tab.index][0]) {
-        this.$refs["tab" + tab.index][0].getList();
-      }
+      // if (this.$refs["tab" + tab.index] && this.$refs["tab" + tab.index][0]) {
+      //   this.$refs["tab" + tab.index][0].getList();
+      // }
     },
 
     buildWeekArr() {
@@ -103,7 +90,7 @@ export default {
         this.selectDate = new Date();
       }
       const weekFirstDay = this.getWeekFirstDay(this.selectDate);
-      
+      this.activeName = this.selectDate.getFullYear() + "-" + (this.selectDate.getMonth() + 1) + "-" + this.selectDate.getDate();
       console.log("选择的日期 和周一", this.selectDate, weekFirstDay)
       for (let i = 0; i < this.week.length; i++) {
         let date = new Date(weekFirstDay.getTime() + 24 * 60 * 60 * 1000 * i);

@@ -68,6 +68,12 @@ export default {
     this.getList();
     // this.buildTableData();
   },
+  watch: {
+    schDate(newVal, oldVal) {
+      console.log("schDate--", newVal)
+      this.getList();
+    }
+  },
   methods: {
     /** 查询放射治疗列表 */
     getList() {
