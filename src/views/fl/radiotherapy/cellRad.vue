@@ -1,6 +1,7 @@
 <template>
-  <div id="tableCell" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave" width="90px" >
-    <div >
+  <div id="tableCell" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave"
+    :class="{ active: isClassActive }" :style="computedStyle">
+    <div>
       <p v-for="e in radList" @click="clickRad(e)" style="text-align: center;">
         <!-- <el-link :underline="false">{{ e.hzXm }}</el-link> -->
         <el-tag :type="getTagType(e)" effect="dark">{{ e.hzXm }}</el-tag>
@@ -96,6 +97,17 @@ export default {
   },
   created() { },
   computed: {
+    isClassActive() {
+      // 当 a 和 b 都为 true 时，isClassActive 为 true
+      return !this.showAddButton && (this.radList == null || this.radList.length == 0);
+    },
+    computedStyle() {
+      // 根据 isClassActive 的值决定是否添加宽度和高度的样式
+      return this.isClassActive ? {
+        width: '90px',
+        height: '50px',
+      } : {};
+    },
   },
   methods: {
     clickRad(e) {
@@ -139,12 +151,12 @@ export default {
       console.log("选中的 fld ", this.selectFlds)
     },
 
-    handleMouseEnter(){
+    handleMouseEnter() {
       console.log("鼠标进入", this.schTime)
       this.showAddButton = true;
     },
 
-    handleMouseLeave(){
+    handleMouseLeave() {
       console.log("鼠标离开", this.schTime)
       this.showAddButton = false;
     },
@@ -190,8 +202,8 @@ export default {
 
 
 <style type="text/css">
-#tableCell {
+/* #tableCell {
   width: 90px;
   height: 50px;
-}
+} */
 </style>
