@@ -17,17 +17,22 @@
       <el-descriptions-item label="治疗结束时间">
         {{ radCopy.cureEndTime | formatDate }}
       </el-descriptions-item>
+      <el-descriptions-item label="X">{{ radCopy.x }}</el-descriptions-item>
+      <el-descriptions-item label="Y">{{ radCopy.y }}</el-descriptions-item>
+      <el-descriptions-item label="Z">{{ radCopy.z }}</el-descriptions-item>
+      <el-descriptions-item label="rotation">{{ radCopy.rotation }}</el-descriptions-item>
       <el-descriptions-item label="治疗状态">
         {{ radCopy.cureStatus === '0' ? '未开始' :
           (radCopy.cureStatus === '1' ? '治疗中' : '已结束') }}
       </el-descriptions-item>
+      <el-descriptions-item label="备注">{{ radCopy.remark }}</el-descriptions-item>
     </el-descriptions>
     <div slot="footer" class="dialog-footer" v-if="radCopy.cureStatus == '0' && showEdit">
       <el-button type="primary" @click="openUpdateSchTimeDia">修改治疗时间</el-button>
       <el-button type="primary" @click="openEndCureDia" v-if="mytest">治疗结束</el-button>
     </div>
     <el-dialog :visible.sync="updateTimeOpen" append-to-body width="600">
-      <el-date-picker v-model="newSchTime" format="yyyy-MM-dd HH:00:00" type="datetime" 
+      <el-date-picker v-model="newSchTime" format="yyyy-MM-dd HH:00:00" type="datetime"
           @change="timeChange" placeholder="选择日期时间">
       </el-date-picker>
       <div slot="footer" class="dialog-footer">
@@ -38,6 +43,11 @@
 
     <el-dialog :visible.sync="endCureOpen" append-to-body width="600">
       <el-input v-for="e in workUserArr" :value="e.userName"></el-input>
+      <el-input :value="radCopy.X"></el-input>
+      <el-input :value="radCopy.Y"></el-input>
+      <el-input :value="radCopy.Z"></el-input>
+      <el-input :value="radCopy.rotation"></el-input>
+      <el-input :value="radCopy.remark" type="textarea"></el-input>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitEndCure">确 定</el-button>
       </div>
@@ -88,7 +98,7 @@
       this.radCopy = {...this.rad};
     },
     computed: {
-      
+
     },
     methods: {
       mytest(){
@@ -124,7 +134,7 @@
         if (exist) {
           this.$modal.msgError("同一天[" + newSchTimeStr.substring(0, 10) + "]不能有两次治疗")
           this.newSchTime = this.radCopy.schTime
-        } 
+        }
 
       },
 
@@ -140,7 +150,12 @@
           id: this.radCopy.id,
           fldId: this.radCopy.fldId,
           schTime: this.newSchTime.getTime() + '',
-          updateAll: this.updateAll ? '1' : '0'
+          updateAll: this.updateAll ? '1' : '0',
+          x: this.radCopy.x,
+          y: this.radCopy.y,
+          z: this.radCopy.z,
+          rotation: this.radCopy.rotation,
+          remark: this.radCopy.remark
         }
         updateSchTime(obj).then(res => {
           if(res && res.code && res.code === 200) {
@@ -155,9 +170,9 @@
       },
 
       canEndCure(){
-        
+
       },
-      
+
 
       //查询当前时间机器技师
       getJS(){
@@ -203,7 +218,7 @@
         var today = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
         console.log("schDate today", schDate, today)
         if (schDate > today) {
-          
+
           this.$modal.msgWarning("只能结束今天或今天之前的治疗")
           return;
         }

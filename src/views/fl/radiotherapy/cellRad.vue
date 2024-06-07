@@ -151,13 +151,11 @@ export default {
       console.log("选中的 fld ", this.selectFlds)
     },
 
-    handleMouseEnter() {
-      console.log("鼠标进入", this.schTime)
+    handleMouseEnter(){
       this.showAddButton = true;
     },
 
-    handleMouseLeave() {
-      console.log("鼠标离开", this.schTime)
+    handleMouseLeave(){
       this.showAddButton = false;
     },
 
