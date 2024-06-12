@@ -32,8 +32,8 @@
       <el-button type="primary" @click="openEndCureDia" v-if="mytest">治疗结束</el-button>
     </div>
     <el-dialog :visible.sync="updateTimeOpen" append-to-body width="600">
-      <el-date-picker v-model="newSchTime" format="yyyy-MM-dd HH:00:00" type="datetime"
-          @change="timeChange" placeholder="选择日期时间">
+      <el-date-picker v-model="newSchTime" format="yyyy-MM-dd HH:00:00" type="datetime" @change="timeChange"
+        placeholder="选择日期时间">
       </el-date-picker>
       <div slot="footer" class="dialog-footer">
         <el-checkbox v-model="updateAll">将当前时间应用到所有治疗</el-checkbox>
@@ -42,12 +42,39 @@
     </el-dialog>
 
     <el-dialog :visible.sync="endCureOpen" append-to-body width="600">
-      <el-input v-for="e in workUserArr" :value="e.userName"></el-input>
-      <el-input :value="radCopy.X"></el-input>
-      <el-input :value="radCopy.Y"></el-input>
-      <el-input :value="radCopy.Z"></el-input>
-      <el-input :value="radCopy.rotation"></el-input>
-      <el-input :value="radCopy.remark" type="textarea"></el-input>
+      <!-- 技师: <el-input v-for="e in workUserArr" :value="e.userName"></el-input>
+      X: <el-input :value="radCopy.x"></el-input>
+      Y:<el-input :value="radCopy.y"></el-input>
+      Z:<el-input :value="radCopy.z"></el-input>
+      rotation: <el-input :value="radCopy.rotation"></el-input>
+      备注: <el-input :value="radCopy.remark" type="textarea"></el-input>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitEndCure">确 定</el-button>
+      </div> -->
+      <el-form ref="endCureForm" :model="radCopy" label-width="100px">
+        <el-form-item label="技师:">
+          <el-input v-for="(e, index) in workUserArr" :key="index" :value="e.userName" disabled></el-input>
+          <!-- <div class="flex-container">
+            <span>技师:</span>
+
+          </div> -->
+        </el-form-item>
+        <el-form-item label="X:">
+          <el-input v-model="radCopy.x"></el-input>
+        </el-form-item>
+        <el-form-item label="Y:">
+          <el-input v-model="radCopy.y"></el-input>
+        </el-form-item>
+        <el-form-item label="Z:">
+          <el-input v-model="radCopy.z"></el-input>
+        </el-form-item>
+        <el-form-item label="rotation:">
+          <el-input v-model="radCopy.rotation"></el-input>
+        </el-form-item>
+        <el-form-item label="备注:">
+          <el-input v-model="radCopy.remark" type="textarea"></el-input>
+        </el-form-item>
+      </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitEndCure">确 定</el-button>
       </div>
@@ -66,11 +93,13 @@
     listSchedule
   } from "@/api/fl/schedule";
   export default {
+    dicts: ['sys_yes_no'],
     props: {
-      dictType: Object,
       rad: Object,
-      showEdit: Boolean,
-      getMachineNameById: Function,
+      showEdit: {
+        type: Boolean,
+        default: false // 这里设置了 showEdit 的默认值为 false
+      },
 
     },
     data() {
@@ -81,7 +110,7 @@
         endCureOpen: false,
         workUserArr: [],
         newSchTime: null,
-        radList:[],
+        radList: [],
       };
     },
     filters: {
@@ -95,17 +124,19 @@
       },
     },
     created() {
-      this.radCopy = {...this.rad};
+      this.radCopy = {
+        ...this.rad
+      };
     },
     computed: {
 
     },
     methods: {
-      mytest(){
+      mytest() {
         console.log("是否执行了mytest")
       },
       getSysYesNoLabel(e) {
-        return this.selectDictLabel(this.dictType.sys_yes_no, e);
+        return this.selectDictLabel(this.dict.type.sys_yes_no, e);
       },
 
       getRadDetail() {
@@ -116,7 +147,7 @@
       },
 
       //查询放疗单下的所有治疗，以便修改日期时判定同一天是否有多次治疗
-      getRadListByFldId(){
+      getRadListByFldId() {
         var para = {
           fldId: this.radCopy.fldId
         }
@@ -125,9 +156,10 @@
         })
       },
 
-      timeChange(){
+      timeChange() {
         let date = this.newSchTime;
-        var newSchTimeStr = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        var newSchTimeStr =
+          `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
 
         //判断this.newSchTime是否和this.radList数组中每个对象的schTime是否为同一天
         const exist = this.radList.find(e => e.schTime.substring(0, 10) === newSchTimeStr.substring(0, 10))
@@ -145,20 +177,16 @@
         this.getRadListByFldId();
         this.updateTimeOpen = true;
       },
-      updateSchTime(){
+      updateSchTime() {
         var obj = {
           id: this.radCopy.id,
           fldId: this.radCopy.fldId,
           schTime: this.newSchTime.getTime() + '',
           updateAll: this.updateAll ? '1' : '0',
-          x: this.radCopy.x,
-          y: this.radCopy.y,
-          z: this.radCopy.z,
-          rotation: this.radCopy.rotation,
-          remark: this.radCopy.remark
+
         }
         updateSchTime(obj).then(res => {
-          if(res && res.code && res.code === 200) {
+          if (res && res.code && res.code === 200) {
             this.$modal.msgSuccess("修改成功");
             this.getRadDetail();
             this.updateTimeOpen = false;
@@ -169,17 +197,17 @@
         })
       },
 
-      canEndCure(){
+      canEndCure() {
 
       },
 
 
       //查询当前时间机器技师
-      getJS(){
+      getJS() {
         const schDate = this.radCopy.schTime.substring(0, 10) + " 00:00:00";
         const HH = parseInt(this.radCopy.schTime.substring(11, 13), 10)
         const ampmFlag = 'am';
-        if (HH >12) {
+        if (HH > 12) {
           ampmFlag = 'pm';
         }
         const queryParam = {
@@ -210,18 +238,19 @@
         })
 
       },
-      openEndCureDia(){
+      openEndCureDia() {
         console.log("开始结束治疗")
 
         const schDate = this.radCopy.schTime.substring(0, 10)
         let date = new Date()
-        var today = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        var today =
+          `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
         console.log("schDate today", schDate, today)
-        if (schDate > today) {
+        // if (schDate > today) {
 
-          this.$modal.msgWarning("只能结束今天或今天之前的治疗")
-          return;
-        }
+        //   this.$modal.msgWarning("只能结束今天或今天之前的治疗")
+        //   return;
+        // }
 
         this.getJS().then(workUserArr => {
           if (workUserArr && workUserArr.length > 0) {
@@ -238,8 +267,12 @@
           fldId: this.radCopy.fldId,
           id: this.radCopy.id,
           remark: this.radCopy.remark,
-          operatorNames: this.workUserArr.map(e=>e.userName).join(","),
-          opertaorIds: this.workUserArr.map(e => e.userId)
+          operatorNames: this.workUserArr.map(e => e.userName).join(","),
+          opertaorIds: this.workUserArr.map(e => e.userId),
+          x: this.radCopy.x,
+          y: this.radCopy.y,
+          z: this.radCopy.z,
+          rotation: this.radCopy.rotation,
         }
 
         endCure(param).then(res => {
@@ -252,6 +285,9 @@
           }
         })
 
+      },
+      getMachineNameById(machineId) {
+        return this.$store.getters['machine/getMachineNameById'](machineId);
       },
     },
   };

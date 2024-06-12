@@ -17,10 +17,12 @@
           <RadDetail :rad="rad" :dictType="dictType" :showEdit="true" :getMachineNameById="getMachineNameById">
           </RadDetail>
         </el-tab-pane>
-        <el-tab-pane label="疗程信息" lazy>
+        <!-- <el-tab-pane label="疗程信息" lazy>
           <RadListTimeLine :rad="rad" :dictType="dictType" :getMachineNameById="getMachineNameById"></RadListTimeLine>
+        </el-tab-pane> -->
+        <el-tab-pane label="放疗单" lazy>
+          <detail :fldId="rad.fldId"></detail>
         </el-tab-pane>
-        <el-tab-pane label="放疗单" lazy>放疗单</el-tab-pane>
       </el-tabs>
     </el-dialog>
 
@@ -69,6 +71,7 @@ import {
 } from "@/api/fl/radiotherapy";
 import RadDetail from './radDetail.vue'
 import RadListTimeLine from './radListTimeLine.vue'
+import detail from "@/views/fl/flsqd/detail.vue"
 export default {
 
   props: {
@@ -81,7 +84,8 @@ export default {
   },
   components: {
     RadDetail,
-    RadListTimeLine
+    RadListTimeLine,
+    detail
   },
   data() {
     return {
@@ -91,7 +95,9 @@ export default {
       addOpen: false,
       flds: [],
       selectFlds: [],
-      rad: null,
+      rad: {
+        fldId: null
+      },
       showAddButton: false,
     }
   },
@@ -135,20 +141,21 @@ export default {
     //查询治疗状态为“未开始”的放疗单
     getFlds() {
       var query = {
-        treatStatus: 'wks',
+        treatStatus: 'wks',//放疗单的疗程状态是未开始
+        fldzt: 'jxz',//放疗单的状态是进行中
         machineId: this.machineId
       }
-      console.log("查询条件", query)
+      // console.log("查询条件", query)
       getFlds(query).then(response => {
         this.flds = response.data
-        console.log("查询结果", response.data)
+        // console.log("查询结果", response.data)
       });
     },
 
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.selectFlds = selection
-      console.log("选中的 fld ", this.selectFlds)
+      // console.log("选中的 fld ", this.selectFlds)
     },
 
     handleMouseEnter(){
@@ -179,7 +186,7 @@ export default {
         radArr.push(rad)
       })
       addRadiotherapy(radArr).then(response => {
-        console.log("新增结果", response)
+        // console.log("新增结果", response)
         this.$emit('addRad');
       });
       this.addOpen = false;

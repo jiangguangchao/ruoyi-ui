@@ -34,7 +34,7 @@ const user1 = {
 
   actions: {
     // 登录
-    Login({ commit }, userInfo) {
+    Login({ commit, dispatch }, userInfo) {
       const username = userInfo.username.trim()
       const password = userInfo.password
       const code = userInfo.code
@@ -43,6 +43,9 @@ const user1 = {
         login(username, password, code, uuid).then(res => {
           setToken(res.token)
           commit('SET_TOKEN', res.token)
+          console.log("machine/initMachineList 之前")
+          dispatch('machine/initMachineList');
+          console.log("machine/initMachineList 之后")
           resolve()
         }).catch(error => {
           reject(error)

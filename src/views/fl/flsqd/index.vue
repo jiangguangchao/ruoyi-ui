@@ -194,8 +194,8 @@
             @click="handleUpdate(scope.row)" v-hasPermi="['fl:flsqd:edit']">修改</el-button>
           <el-button v-show="scope.row.fldzt == 'jxz'" size="mini" type="text" icon="el-icon-edit"
             @click="openAlloctDig(scope.row)" v-hasPermi="['fl:flsqd:edit']">指派</el-button>
-          <el-button size="mini" type="text" icon="el-icon-edit" @click="openLCDig(scope.row)"
-            v-hasPermi="['fl:fllcjl:list']">流程详情</el-button>
+          <!-- <el-button size="mini" type="text" icon="el-icon-edit" @click="openLCDig(scope.row)"
+            v-hasPermi="['fl:fllcjl:list']">流程详情</el-button> -->
           <el-button v-show="scope.row.fldzt == 'jxz'" size="mini" type="text" icon="el-icon-edit"
             @click="handleSign(scope.row)" v-hasPermi="['fl:flsqd:sign']">签名</el-button>
           <el-button size="mini" type="text" icon="el-icon-edit" @click="openDetailDig(scope.row)">详情</el-button>
@@ -407,9 +407,11 @@
       </span>
     </el-dialog>
 
-    <flsqdDetail ref="flsqdDetail"></flsqdDetail>
+    <el-dialog :title="detailTitle" :visible.sync="detailOpen" :before-close="closeDetail">
+      <detail ref="detail" :fldId="flsqdId"></detail>
+    </el-dialog>
 
-    <lcDetail ref="lcDetail"></lcDetail>
+
 
   </div>
 </template>
@@ -431,14 +433,14 @@
   import {
     allUser
   } from "@/api/system/user";
-  import flsqdDetail from "./flsqdDetail.vue";
   import {
     newId
   } from "../../../api/fl/flsqd";
   import {
     listUser as listPostUser
   } from "@/api/fl/assignwork";
-  import lcDetail from "./lcDetail.vue";
+  import { listMachine } from "@/api/fl/machine";
+  import detail from "./detail.vue";
 
   export default {
     name: "Flsqd",
@@ -463,8 +465,10 @@
         flsqdList: [],
         // 弹出层标题
         title: "",
+        detailTitle: '放疗单详情',
         // 是否显示弹出层
         open: false,
+        detailOpen: false,
         // 查询参数
         queryParams: {
           pageNum: 1,
@@ -499,6 +503,7 @@
         flsqdObj: null,
         newId: null,
         processNodes: ['节点1', '节点2', '节点3', '节点4'],
+        machineArr: [],
 
 
         steps: [{
@@ -722,10 +727,10 @@
       this.getUsers();
       this.getList();
       this.getNewId();
+      this.getMachine();
     },
     components: {
-      flsqdDetail,
-      lcDetail
+      detail
     },
     methods: {
       /** 查询放疗申请单列表 */
@@ -920,15 +925,18 @@
         }).catch(() => {});
       },
       //openLCDig
-      openLCDig(row) {
-        this.$refs.lcDetail.openDia(row);
-      },
+      // openLCDig(row) {
+      //   this.$refs.lcDetail.openDia(row);
+      // },
 
       openDetailDig(row) {
-        this.$refs.flsqdDetail.openDia(row);
+        this.detailOpen = true;
+        this.flsqdId = row.id;
+        // this.$refs.detail.openDia(row.id);
+
       },
       closeDetail() {
-        this.flsqdDetailOpen = false
+        this.detailOpen = false
         this.flsqdId = null
         this.flsqdObj = null
       },
@@ -954,6 +962,23 @@
         }).then(response => {
           this.postUserList = response;
         });
+      },
+
+      getMachine() {
+        listMachine({ pageNum: 1, pageSize: 100, }).then(response => {
+          this.machineArr = response.rows
+        });
+      },
+
+      getMachineNameById(id) {
+        if (id == null || id == undefined) {
+          return '';
+        }
+        var m = this.machineArr.find(e => e.id == id)
+        if (m == null) {
+          return id;
+        }
+        return m.name;
       },
 
     }
