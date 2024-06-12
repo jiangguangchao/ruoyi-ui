@@ -16,6 +16,7 @@
     dicts: ['fl_lc'],
     props: {
       fldId: String,
+      activeName: String,
     },
     data() {
       return {
@@ -24,10 +25,21 @@
       };
     },
     watch: {
+
+      activeName(newVal, oldVal) {
+        console.log("activeName", newVal)
+        if ("计划信息" == newVal) {
+          this.getNodes();
+        }
+      },
+
       fldId(newVal, oldVal) {
         console.log("fldId", newVal)
-        this.getNodes();
-      }
+        if ("计划信息" == this.activeName) {
+          this.getNodes();
+        }
+      },
+
     },
     created() {
       this.getNodes()
@@ -35,6 +47,9 @@
     methods: {
 
       getNodes() {
+        if (!this.fldId) {
+          return;
+        }
         this.nodes = [];
         getFllcjl(this.fldId).then(response => {
           this.dict.type.fl_lc.forEach((e, index) => {
@@ -64,7 +79,7 @@
             if (index === this.dict.type.fl_lc.length - 1) {
               node.next = null;
             }
-            
+
             this.nodes.push(node);
           })
 

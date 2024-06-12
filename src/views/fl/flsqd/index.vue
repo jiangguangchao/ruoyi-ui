@@ -37,10 +37,6 @@
           v-hasPermi="['fl:flsqd:add']">新增</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleUpdate"
-          v-hasPermi="['fl:flsqd:edit']">修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
         <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete"
           v-hasPermi="['fl:flsqd:remove']">删除</el-button>
       </el-col>
@@ -371,13 +367,13 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="总放疗次数" prop="cureCount">
-          <el-input-number v-model="form.cureCount" :min="1" :max="100" ></el-input-number>
+          <el-input-number v-model="form.cureCount" :min="1" :max="100"></el-input-number>
         </el-form-item>
         <el-form-item label="已完成放疗次数" prop="curedCount">
-          <el-input-number v-model="form.curedCount" :min="0" :max="form.cureCount" ></el-input-number>
+          <el-input-number v-model="form.curedCount" :min="0" :max="form.cureCount"></el-input-number>
         </el-form-item>
         <el-form-item label="已支付治疗次数" prop="paidCount">
-          <el-input-number v-model="form.paidCount" :min="0" :max="form.cureCount" ></el-input-number>
+          <el-input-number v-model="form.paidCount" :min="0" :max="form.cureCount"></el-input-number>
         </el-form-item>
         <el-form-item label="放疗单状态">
           <el-radio-group v-model="form.fldzt">
@@ -394,6 +390,8 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <edit ref="edit" @editSuccessEvent="getList"></edit>
 
     <!--指派或转派弹窗-->
     <el-dialog :visible.sync="allocateDigOpen" title="选择操作人员" width="500px">
@@ -435,12 +433,15 @@
   } from "@/api/system/user";
   import {
     newId
-  } from "../../../api/fl/flsqd";
+  } from "@/api/fl/flsqd";
   import {
     listUser as listPostUser
   } from "@/api/fl/assignwork";
-  import { listMachine } from "@/api/fl/machine";
+  import {
+    listMachine
+  } from "@/api/fl/machine";
   import detail from "./detail.vue";
+  import edit from "./edit.vue";
 
   export default {
     name: "Flsqd",
@@ -730,7 +731,8 @@
       this.getMachine();
     },
     components: {
-      detail
+      detail,
+      edit
     },
     methods: {
       /** 查询放疗申请单列表 */
@@ -824,27 +826,30 @@
       },
       /** 新增按钮操作 */
       handleAdd() {
-        this.reset();
-        this.open = true;
-        this.title = "添加放疗申请单";
-        console.log("获取到新id", this.newId)
-        this.form.id = this.newId;
-        this.addFlag = true;
+        //this.reset();
+        //this.open = true;
+        //this.title = "添加放疗申请单";
+        //console.log("获取到新id", this.newId)
+        //this.form.id = this.newId;
+        //this.addFlag = true;
         // if (this.form.id == null || this.form.id == undefined || this.form.id = '') {
         //   console.log("获取放疗单id失败")
         //   this.$modal.msgSuccess("获取放疗单id失败");
         // }
+
+        this.$refs.edit.handleAdd(row);
       },
       /** 修改按钮操作 */
       handleUpdate(row) {
-        this.reset();
-        const id = row.id || this.ids
-        getFlsqd(id).then(response => {
-          this.form = response.data;
-          this.open = true;
-          this.title = "修改放疗申请单";
-          this.addFlag = false;
-        });
+        this.$refs.edit.handleUpdate(row);
+        //this.reset();
+        //const id = row.id || this.ids
+        //getFlsqd(id).then(response => {
+        // this.form = response.data;
+        //this.open = true;
+        //this.title = "修改放疗申请单";
+        //this.addFlag = false;
+        //});
       },
       handleStart(row) {
         // this.reset();
@@ -937,7 +942,7 @@
       },
       closeDetail() {
         this.detailOpen = false
-        this.flsqdId = null
+        // this.flsqdId = null
         this.flsqdObj = null
       },
 
@@ -965,7 +970,10 @@
       },
 
       getMachine() {
-        listMachine({ pageNum: 1, pageSize: 100, }).then(response => {
+        listMachine({
+          pageNum: 1,
+          pageSize: 100,
+        }).then(response => {
           this.machineArr = response.rows
         });
       },
