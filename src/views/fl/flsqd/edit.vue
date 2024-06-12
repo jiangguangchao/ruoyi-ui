@@ -187,10 +187,10 @@
         </el-form>
       </el-tab-pane>
       <el-tab-pane label="靶区" lazy>
-        <target :fldid="fldId"></target>
+        <target :fldid="fldId" :editFlag="true"></target>
       </el-tab-pane>
       <el-tab-pane label="危害器官" lazy>
-        <organ :fldid="fldId"></organ>
+        <organ :fldid="fldId" :editFlag="true"></organ>
       </el-tab-pane>
     </el-tabs>
 

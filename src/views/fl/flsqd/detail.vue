@@ -27,6 +27,7 @@
         <treatment :fldId="fldId"></treatment>
       </el-tab-pane>
       <el-tab-pane label="计划信息" lazy name="计划信息">
+        <!--lcDetail这个组件使用的有流程图组件，比较特殊-->
         <lcDetail :fldId="fldId" :activeName="activeName"  ></lcDetail>
       </el-tab-pane>
     </el-tabs>

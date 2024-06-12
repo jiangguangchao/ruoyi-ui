@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
 
-    <el-row :gutter="10" class="mb8">
+    <el-row :gutter="10" class="mb8" v-if="editFlag">
       <el-col :span="1.5">
         <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
           v-hasPermi="['fl:targetregion:add']">新增</el-button>
@@ -14,7 +14,7 @@
       <el-table-column label="靶区" align="center" prop="region" />
       <el-table-column label="分次剂量" align="center" prop="dose" />
       <el-table-column label="分次数" align="center" prop="count" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" v-if="editFlag">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
             v-hasPermi="['fl:targetregion:edit']">修改</el-button>
@@ -59,7 +59,11 @@
 
   export default {
     props: {
-      fldid: String
+      fldid: String,
+      editFlag: {
+        type: Boolean,
+        default: false,
+      },
     },
     data() {
       return {
