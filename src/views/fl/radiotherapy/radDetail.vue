@@ -111,6 +111,7 @@
         workUserArr: [],
         newSchTime: null,
         radList: [],
+        endCureFlag: false,
       };
     },
     filters: {
@@ -190,6 +191,7 @@
             this.$modal.msgSuccess("修改成功");
             this.getRadDetail();
             this.updateTimeOpen = false;
+            this.endCureFlag = true;
           } else {
             this.$modal.msgError("修改失败")
           }
@@ -226,10 +228,25 @@
             if (res.rows && res.rows.length > 0) {
               res.rows.forEach(e => {
                 if (ampmFlag == 'am' && (e.schTime == 'qt' || e.schTime == 'sw')) {
-                  workUserArr.push(e)
+                  if (e.dbr && (e.dbsj == 'qt' || e.dbsj == 'sw')) {
+                    workUserArr.push({
+                      userId: e.dbr,
+                      userName: e.dbrName
+                    });
+                  } else {
+                    workUserArr.push(e)
+                  }
+
                 }
                 if (ampmFlag == 'pm' && (e.schTime == 'qt' || e.schTime == 'xw')) {
-                  workUserArr.push(e)
+                  if (e.dbr && (e.dbsj == 'qt' || e.dbsj == 'xw')) {
+                    workUserArr.push({
+                      userId: e.dbr,
+                      userName: e.dbrName
+                    });
+                  } else {
+                    workUserArr.push(e)
+                  }
                 }
               })
             }
@@ -280,6 +297,8 @@
             this.$modal.msgSuccess("成功结束本次治疗")
             this.getRadDetail()
             this.endCureOpen = false;
+            this.endCureFlag = true;
+            this.$emit("endCure")
           } else {
             this.$modal.msgError("结束本次治疗出现异常")
           }

@@ -431,7 +431,7 @@
       },
 
       getNewId() {
-        newId().then(response => {
+        return newId().then(response => {
           return response.data;
         });
       },
@@ -492,11 +492,11 @@
       /** 新增按钮操作 */
       async handleAdd() {
         this.reset();
-        this.open = true;
         this.title = "添加放疗申请单";
-        console.log("获取到新id", this.newId)
         this.form.id = await this.getNewId();
+        console.log("获取到新id", this.form.id)
         this.addFlag = true;
+        this.open = true;
         // if (this.form.id == null || this.form.id == undefined || this.form.id = '') {
         //   console.log("获取放疗单id失败")
         //   this.$modal.msgSuccess("获取放疗单id失败");

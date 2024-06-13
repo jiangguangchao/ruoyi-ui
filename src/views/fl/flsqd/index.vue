@@ -837,7 +837,7 @@
         //   this.$modal.msgSuccess("获取放疗单id失败");
         // }
 
-        this.$refs.edit.handleAdd(row);
+        this.$refs.edit.handleAdd();
       },
       /** 修改按钮操作 */
       handleUpdate(row) {

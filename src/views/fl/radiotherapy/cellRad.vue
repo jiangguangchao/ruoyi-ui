@@ -2,8 +2,7 @@
   <div id="tableCell" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave"
     :class="{ active: isClassActive }" :style="computedStyle">
     <div>
-      <p v-for="e in radList" @click="clickRad(e)" style="text-align: center;">
-        <!-- <el-link :underline="false">{{ e.hzXm }}</el-link> -->
+      <p v-for="e in copyRadList" @click="clickRad(e)" style="text-align: center;">
         <el-tag :type="getTagType(e)" effect="dark">{{ e.hzXm }}</el-tag>
       </p>
       <p @click="showAddDialog" style="text-align: center;" v-show="showAddButton">
@@ -14,7 +13,7 @@
     <el-dialog :title="infoTitle" :visible.sync="infoOpen" width="800px" append-to-body>
       <el-tabs type="border-card">
         <el-tab-pane label="本次放疗信息" lazy>
-          <RadDetail :rad="rad" :dictType="dictType" :showEdit="true" :getMachineNameById="getMachineNameById">
+          <RadDetail :rad="rad" :dictType="dictType" :showEdit="true" :getMachineNameById="getMachineNameById" @endCure="endCure(rad)">
           </RadDetail>
         </el-tab-pane>
         <!-- <el-tab-pane label="疗程信息" lazy>
@@ -99,9 +98,12 @@ export default {
         fldId: null
       },
       showAddButton: false,
+      copyRadList: [],
     }
   },
-  created() { },
+  created() {
+    this.copyRadList = this.radList.slice();
+  },
   computed: {
     isClassActive() {
       // 当 a 和 b 都为 true 时，isClassActive 为 true
@@ -122,6 +124,14 @@ export default {
       this.infoOpen = true;
     },
 
+    getSimpleInfo(rad) {
+      if(rad.cureStatus == '5') {
+        return rad.hzXm + " " + rad.cureIndex + "/" + rad.cureCount + " " + rad.cureOperator
+      } else {
+        return rad.hzXm
+      }
+    },
+
     getTagType(e) {
       if (e.cureStatus == '0') {
         return 'info';
@@ -130,6 +140,17 @@ export default {
       } else {
         return "success"
       }
+
+    },
+
+    endCure(rad){
+      const list = this.copyRadList.slice();
+      list.forEach(e=>{
+        if (e.id == rad.id) {
+          e.cureStatus = '5';
+        }
+      });
+      this.copyRadList = list;
 
     },
 
@@ -211,4 +232,18 @@ export default {
   width: 90px;
   height: 50px;
 } */
+
+.custom-tag {
+  display: inline-block;
+  padding: 0 5px;
+  height: 20px;
+  line-height: 20px;
+  background-color: #409EFF; /* Element UI 默认的标签颜色 */
+  color: #fff;
+  border-radius: 4px;
+  /* 允许内容换行 */
+  white-space: normal;
+  word-break: break-all; /* 如果需要的话，允许在任意位置换行 */
+  /* 你可以添加更多的样式来适应你的需求 */
+}
 </style>
