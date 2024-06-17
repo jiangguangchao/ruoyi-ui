@@ -14,13 +14,13 @@
         <template slot="label">
           患者姓名
         </template>
-        {{ flsqd.hzXm }}
+        {{ flsqd.hzXm}}
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
           患者性别
         </template>
-        {{ flsqd.hzXb }}
+        <dict-tag :options="dict.type.sys_user_sex" :value="flsqd.hzXb" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
@@ -62,7 +62,7 @@
         <template slot="label">
           患者同步化疗
         </template>
-        {{ flsqd.hzTbhl }}
+        <dict-tag :options="dict.type.sys_yes_no" :value="flsqd.hzTbhl" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
@@ -74,7 +74,7 @@
         <template slot="label">
           固定方式
         </template>
-        {{ flsqd.gdfs }}
+        <dict-tag :options="dict.type.fl_gdfs" :value="flsqd.gdfs" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
@@ -104,19 +104,19 @@
         <template slot="label">
           扫描类型1
         </template>
-        {{ flsqd.smlx1 }}
+        <dict-tag :options="dict.type.fl_smlx1" :value="flsqd.smlx1" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
           扫描类型2
         </template>
-        {{ flsqd.smlx2 }}
+        <dict-tag :options="dict.type.fl_smlx2" :value="flsqd.smlx2" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
           是否空腹
         </template>
-        {{ flsqd.kf }}
+        <dict-tag :options="dict.type.sys_yes_no" :value="flsqd.kf" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
@@ -128,7 +128,7 @@
         <template slot="label">
           是否憋尿
         </template>
-        {{ flsqd.bn }}
+        <dict-tag :options="dict.type.sys_yes_no" :value="flsqd.bn" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
@@ -140,13 +140,13 @@
         <template slot="label">
           是否BOLUS
         </template>
-        {{ flsqd.bolus }}
+        <dict-tag :options="dict.type.sys_yes_no" :value="flsqd.bolus" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
           是否口含瓶
         </template>
-        {{ flsqd.khp }}
+        <dict-tag :options="dict.type.sys_yes_no" :value="flsqd.khp" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
@@ -158,7 +158,7 @@
         <template slot="label">
           图像融合类型
         </template>
-        {{ flsqd.txrhlx }}
+        <dict-tag :options="dict.type.fl_txrhlx" :value="flsqd.txrhlx" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
@@ -170,31 +170,31 @@
         <template slot="label">
           是否重定位
         </template>
-        {{ flsqd.cdw }}
+        <dict-tag :options="dict.type.sys_yes_no" :value="flsqd.cdw" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
           治疗技术
         </template>
-        {{ flsqd.zljs }}
+        <dict-tag :options="dict.type.fl_zljs" :value="flsqd.zljs" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
           治疗机器
         </template>
-        {{ flsqd.zljq }}
+        <dict-tag :options="dict.type.fl_zljq" :value="flsqd.zljq" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
           IGRT
         </template>
-        {{ flsqd.igrt }}
+        <dict-tag :options="dict.type.fl_IGRT" :value="flsqd.igrt" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
           IGRT频率类型
         </template>
-        {{ flsqd.igrtpllx }}
+        <dict-tag :options="dict.type.fl_igrtpllx" :value="flsqd.igrtpllx" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
@@ -206,20 +206,20 @@
         <template slot="label">
           是否呼吸门控
         </template>
-        {{ flsqd.hxmk }}
+        <dict-tag :options="dict.type.sys_yes_no" :value="flsqd.hxmk" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
           是否剂量验证
         </template>
-        {{ flsqd.jlyz }}
+        <dict-tag :options="dict.type.sys_yes_no" :value="flsqd.jlyz" />
       </el-descriptions-item>
 
       <el-descriptions-item>
         <template slot="label">
           放疗单状态
         </template>
-        {{ flsqd.fldzt }}
+        <dict-tag :options="dict.type.fl_fldzt" :value="flsqd.fldzt" />
       </el-descriptions-item>
       <el-descriptions-item>
         <template slot="label">
