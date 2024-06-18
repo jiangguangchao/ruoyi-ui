@@ -14,6 +14,7 @@
         </el-select>
       </el-form-item>
 
+
       <el-form-item label="时间">
         <el-date-picker
           v-model="dateRange"
@@ -27,22 +28,33 @@
         </el-date-picker>
       </el-form-item>
 
+      <el-form-item label="简略信息">
+        <el-checkbox v-model="showSimpleInfo"></el-checkbox>
+      </el-form-item>
+
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-table v-loading="loading" :data="workloadList" >
+    <el-table ref="a" v-loading="loading" :data="workloadList" v-if="!showSimpleInfo">
       <el-table-column label="ID" align="center" prop="id" />
       <el-table-column label="放疗师" align="center" prop="czrmc" />
+      <el-table-column label="签字时间" align="center" prop="czsj" />
+      <el-table-column label="放疗单编号" align="center" prop="flid" />
       <el-table-column label="工作内容/岗位" align="center" prop="lcjdmc">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.fl_lc" :value="scope.row.lcjdmc"/>
         </template>
       </el-table-column>
-      <el-table-column label="签字时间" align="center" prop="czsj" />
-      <el-table-column label="放疗单编号" align="center" prop="flid" />
+    </el-table>
+
+
+    <el-table ref="b" v-loading="loadingS" :data="workloadStatList" v-if="showSimpleInfo">
+      <el-table-column type="index" align="center" />
+      <el-table-column label="放疗师" align="center" prop="userName" />
+      <el-table-column label="工作总量" align="center" prop="workloadCount" />
     </el-table>
 
     <pagination
@@ -54,16 +66,6 @@
     />
 
 
-    <!--流程详情-->
-    <el-dialog :visible.sync="lcDetailOpen" title="选择操作人员" width="900px">
-      <div class="flowchart">
-        <div v-for="(step, index) in steps" :key="index" class="step">
-          <div class="stepDoing">
-            <p> {{ step.lcname }} -- {{ step.operator }} - {{ step.date }} </p>
-          </div>
-        </div>
-      </div>
-    </el-dialog>
 
   </div>
 </template>
@@ -97,7 +99,7 @@
 <script>
 import { listFlsqd, getFlsqd, delFlsqd, addFlsqd, updateFlsqd, startFlsqd, signFlsqd } from "@/api/fl/flsqd";
 import { listFllcjl, getFllcjl } from "@/api/fl/fllcjl";
-import { listWorkload, fls } from "@/api/fl/workload";
+import { listWorkload, statWorkload, fls } from "@/api/fl/workload";
 import { allUser } from "@/api/system/user";
 // import mermaid from 'mermaid';
 // import 'mermaid/dist/mermaid.css'; // 引入Mermaid样式文件
@@ -110,6 +112,7 @@ export default {
     return {
       // 遮罩层
       loading: true,
+      loadingS: true,
       // 显示搜索条件
       showSearch: true,
       // 总条数
@@ -128,8 +131,10 @@ export default {
       },
       // 表单参数
       form: {},
+      showSimpleInfo: true,
       dateRange: [],
       workloadList: [],
+      workloadStatList: [],
       flsList: [],
       lcDetailOpen: false,
       steps: [
@@ -171,20 +176,36 @@ export default {
     };
   },
   created() {
-    this.getList();
+    this.handleQuery();
     this.getFls();
+  },
+  watch: {
+    showSimpleInfo(newVal, oldVal) {
+      console.log("showSimpleInfo变化", this.showSimpleInfo)
+      this.handleQuery();
+    }
   },
   methods: {
     /** 查询工作量列表 */
     getList() {
       this.loading = true;
-      
+
       listWorkload(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
         this.workloadList = response.rows;
         this.total = response.total;
         this.loading = false;
       });
     },
+
+    /** 查询工作量统计 */
+    getStatList() {
+      this.loadingS = true;
+      statWorkload(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
+        this.workloadStatList = response;
+        this.loadingS = false;
+      });
+    },
+
     getFls() {
       fls().then(response => {
         this.flsList = response;
@@ -193,8 +214,15 @@ export default {
 
     /** 搜索按钮操作 */
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
+
+      console.log("handleQuery", this.showSimpleInfo)
+      if (this.showSimpleInfo) {
+        this.getStatList();
+      } else {
+        this.queryParams.pageNum = 1;
+        this.getList();
+      }
+
     },
     /** 重置按钮操作 */
     resetQuery() {
@@ -202,32 +230,7 @@ export default {
       this.handleQuery();
     },
 
-    //openLCDig
-    openLCDig(row) {
-      this.lcDetailOpen = true;
-      this.getFllcDetail(row);
-    },
 
-    getFllcDetail(row) {
-      var query = {
-        flid: row.id
-      };
-      listFllcjl(query).then(response=> {
-        var stepList = response.rows;
-        if (stepList == undefined || stepList == null) {
-          console.log("当前放疗单流程详情为空")
-          return;
-        } else {
-          // console.log("当前放疗单流程详情", stepList)
-          for(var i = 0; i < stepList.length; i++) {
-
-            this.steps[i].operator = stepList[i].czrmc;
-            this.steps[i].date = stepList[i].czsj;
-          }
-        }
-
-      });
-    },
   }
 };
 </script>
