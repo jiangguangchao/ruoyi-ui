@@ -7,9 +7,9 @@
             <span>个人信息</span>
           </div>
           <div>
-            <div class="text-center">
+            <!-- <div class="text-center">
               <userAvatar :user="user" />
-            </div>
+            </div> -->
             <ul class="list-group list-group-striped">
               <li class="list-group-item">
                 <svg-icon icon-class="user" />用户名称

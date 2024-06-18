@@ -23,23 +23,17 @@
           <size-select id="size-select" class="right-menu-item hover-effect" />
         </el-tooltip> -->
 
-        <el-tag type="success" @click="showUserListAtPost" size="medium" effect="dark">靶区勾画</el-tag>
-
 
       </template>
 
       <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="avatar" class="user-avatar">
-          <i class="el-icon-caret-bottom" />
+          <i class="el-icon-s-custom" />
         </div>
         <el-dropdown-menu slot="dropdown">
           <router-link to="/user/profile">
             <el-dropdown-item>个人中心</el-dropdown-item>
           </router-link>
-          <el-dropdown-item @click.native="setting = true">
-            <span>布局设置</span>
-          </el-dropdown-item>
           <el-dropdown-item divided @click.native="logout">
             <span>退出登录</span>
           </el-dropdown-item>
