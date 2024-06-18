@@ -131,7 +131,7 @@ export default {
       },
       // 表单参数
       form: {},
-      showSimpleInfo: true,
+      showSimpleInfo: false,
       dateRange: [],
       workloadList: [],
       workloadStatList: [],
